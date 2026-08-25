@@ -1,0 +1,14 @@
+{
+  "name": "nutrition-battle",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "營養大作戰 - 兩人實時搶答對戰遊戲（Cloudflare Workers + Durable Objects）",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

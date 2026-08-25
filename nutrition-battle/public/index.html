@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>營養大作戰</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍎</text></svg>" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="fx"></canvas>
+
+  <!-- ===== 主頁 ===== -->
+  <section id="screen-home" class="screen active">
+    <div class="logo">🍎⚔️</div>
+    <h1 class="title">營養大作戰</h1>
+    <p class="subtitle">兩人實時搶答 · 鬥快鬥準鬥高分</p>
+    <div class="card home-card">
+      <input id="nameInput" maxlength="12" placeholder="你嘅名字／暱稱" autocomplete="off" />
+      <button id="btnCreate" class="btn btn-primary big">🎮 建立房間</button>
+      <div class="join-row">
+        <input id="codeInput" maxlength="4" placeholder="房號" autocapitalize="characters" autocomplete="off" />
+        <button id="btnJoin" class="btn btn-secondary">加入房間</button>
+      </div>
+      <p class="hint">建立後將 4 位房號話俾對方知，佢輸入即可加入</p>
+    </div>
+    <div class="rules">
+      <span>⚡ 搶答越快，分數越高</span><span>🔥 三連擊有道具</span><span>❤️ 答答錯扣血，歸零即敗</span>
+    </div>
+  </section>
+
+  <!-- ===== 等待室 ===== -->
+  <section id="screen-lobby" class="screen">
+    <p class="lobby-label">房間號碼</p>
+    <div id="roomCode" class="room-code">----</div>
+    <p class="hint">對方開同一網址 → 輸入房號 → 加入</p>
+    <div class="slots">
+      <div id="slot0" class="player-slot"><div class="avatar">🧑‍🎓</div><div class="pname">等待中…</div></div>
+      <div class="vs">VS</div>
+      <div id="slot1" class="player-slot"><div class="avatar">🧑‍🎓</div><div class="pname">等待中…</div></div>
+    </div>
+    <button id="btnStart" class="btn btn-primary big" disabled>開始比賽！</button>
+    <button id="btnLeaveLobby" class="btn btn-ghost small">離開</button>
+  </section>
+
+  <!-- ===== 對戰畫面 ===== -->
+  <section id="screen-game" class="screen">
+    <header class="hud">
+      <div id="hudMe" class="pcard me">
+        <div class="prow"><span class="pname"></span><span class="combo"></span></div>
+        <div class="pscore">0</div>
+        <div class="hpbar"><div class="hpfill"></div></div>
+        <div class="ppowers"></div>
+      </div>
+      <div class="hud-mid">
+        <div id="qNum" class="qnum">Q1/10</div>
+        <div class="timertrack"><div id="timerFill" class="timerfill"></div></div>
+      </div>
+      <div id="hudOpp" class="pcard opp">
+        <div class="prow"><span class="combo"></span><span class="pname"></span></div>
+        <div class="pscore">0</div>
+        <div class="hpbar"><div class="hpfill"></div></div>
+        <div class="ppowers"></div>
+      </div>
+    </header>
+
+    <div id="notice" class="notice"></div>
+
+    <main class="qarea">
+      <div class="qcard">
+        <div class="qtags">
+          <span id="qCat" class="chip"></span>
+          <span id="qDouble" class="chip double hidden">🔥 終極題 ×2</span>
+          <span id="buzzed" class="chip buzz hidden">對手已搶答！</span>
+        </div>
+        <h2 id="qText">…</h2>
+      </div>
+      <div class="options">
+        <button class="opt" data-i="0"><span class="letter">A</span><span class="otext"></span></button>
+        <button class="opt" data-i="1"><span class="letter">B</span><span class="otext"></span></button>
+        <button class="opt" data-i="2"><span class="letter">C</span><span class="otext"></span></button>
+        <button class="opt" data-i="3"><span class="letter">D</span><span class="otext"></span></button>
+      </div>
+    </main>
+
+    <footer class="powerdock">
+      <button class="pw" data-p="fifty"><span>🗑️</span>50/50<b class="cnt">0</b></button>
+      <button class="pw" data-p="freeze"><span>❄️</span>凍結<b class="cnt">0</b></button>
+      <button class="pw" data-p="steal"><span>💰</span>偷分<b class="cnt">0</b></button>
+    </footer>
+  </section>
+
+  <!-- ===== 結果 ===== -->
+  <section id="screen-over" class="screen">
+    <div id="overBanner" class="over-banner">🏆</div>
+    <div class="finals">
+      <div class="fscore me"><span class="fname"></span><b class="fpts">0</b></div>
+      <div class="vs">VS</div>
+      <div class="fscore opp"><span class="fname"></span><b class="fpts">0</b></div>
+    </div>
+    <div id="weakTip" class="weaktip hidden"></div>
+    <div class="overbtns">
+      <button id="btnRematch" class="btn btn-primary big">🔁 再嚟一舖！</button>
+      <button id="btnHomeOver" class="btn btn-ghost small">返回主頁</button>
+    </div>
+  </section>
+
+  <!-- ===== 覆蓋層 ===== -->
+  <div id="countOverlay" class="overlay hidden"><div id="countNum" class="countnum">3</div></div>
+  <div id="pauseOverlay" class="overlay hidden">
+    <div class="pausebox">📡 對手斷線<br /><small id="pauseHint">等待重連中…</small></div>
+  </div>
+  <div id="reconnOverlay" class="overlay hidden"><div class="pausebox">🔄 重連中…<small>請稍候</small></div></div>
+  <div id="toasts"></div>
+
+  <button id="muteBtn" title="音效">🔊</button>
+
+  <script src="app.js"></script>
+</body>
+</html>
