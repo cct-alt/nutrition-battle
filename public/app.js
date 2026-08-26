@@ -32,6 +32,7 @@ const S = {
   removed: [],
   qDeadline: 0,
   lastTickSec: -1,
+  lastRecv: Date.now(),
   muted: localStorage.getItem('nb_muted') === '1'
 };
 
@@ -190,12 +191,12 @@ function scheduleReconnect() {
   if (S.phase === 'home') return;
   reconnTries += 1;
   $('#reconnOverlay').classList.remove('hidden');
-  if (reconnTries > 20) {
+  if (reconnTries > 40) {
     backHome('連線中斷，請重新加入');
     return;
   }
   clearTimeout(reconnTimer);
-  reconnTimer = setTimeout(() => connect(S.code), 1300);
+  reconnTimer = setTimeout(() => connect(S.code), 1500);
 }
 
 function backHome(msg) {
@@ -212,8 +213,32 @@ function backHome(msg) {
   showScreen('home');
 }
 
+/* ---------- 心跳 + 斷線偵測（對付學校 Wi-Fi 不穩／iPad 睡屏斷線） ---------- */
+setInterval(() => {
+  if (S.ws && S.ws.readyState === 1) send({ type: 'ping' });
+}, 12000);
+
+// 半開連線偵測：15 秒無收到任何伺服器訊息（包括 pong）就強制重連
+setInterval(() => {
+  if (S.phase === 'home' || !S.ws) return;
+  if (Date.now() - S.lastRecv > 15000) {
+    try { if (S.ws.readyState <= 1) S.ws.close(); } catch (e) {}
+  }
+}, 4000);
+
+// iPad 睡屏後返回：即刻嘗試重連
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && S.phase !== 'home' &&
+      (!S.ws || S.ws.readyState !== 1)) {
+    reconnTries = 0;
+    clearTimeout(reconnTimer);
+    connect(S.code);
+  }
+});
+
 /* ---------- 訊息處理 ---------- */
 function handleMsg(m) {
+  S.lastRecv = Date.now();
   switch (m.type) {
     case 'init': return onInit(m);
     case 'lobby': return onLobby(m);
@@ -261,14 +286,16 @@ function onInit(m) {
   if (m.phase === 'question' && m.options) {
     showScreen('game');
     onQuestion(m);
-  } else if (m.phase === 'over') {
-    showScreen('lobby');
+  } else if (m.phase === 'over' && m.winner !== undefined) {
+    onGameOver(m);
+  } else if (m.phase === 'paused' || m.phase === 'reveal') {
+    showScreen('game');
+    if (m.phase === 'paused') {
+      $('#pauseHint').textContent = '等待對手重連…';
+      $('#pauseOverlay').classList.remove('hidden');
+    }
   } else {
     showScreen('lobby');
-  }
-  if (m.phase === 'paused') {
-    $('#pauseHint').textContent = '等待對手重連…';
-    $('#pauseOverlay').classList.remove('hidden');
   }
 }
 
@@ -283,6 +310,8 @@ function onPlayers(players) {
 function onLobby(m) {
   S.hostSlot = m.hostSlot;
   onPlayers(m.players);
+  // 比賽進行中（或等對手重連時）千萬不要彈返去大廳畫面
+  if (S.phase === 'game' || S.phase === 'paused' || S.phase === 'over') return;
   showScreen('lobby');
 }
 
@@ -529,7 +558,7 @@ function onGameOver(m) {
     banner.textContent += won ? ' ⚡KO勝利' : ' ⚡被KO';
   }
   if (m.reason === 'forfeit' && !draw) {
-    banner.textContent += won ? '（對手離場）' : '';
+    banner.textContent += won ? '（對手離場）' : '（斷線太久）';
   }
 
   $('.fscore.me .fname').textContent = (me() || {}).name || '你';

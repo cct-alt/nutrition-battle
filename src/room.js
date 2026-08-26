@@ -13,8 +13,9 @@ const WRONG_HP = 20;         // 答錯扣血
 const FREEZE_MS = 5000;      // 凍結對手時長
 const STEAL_AMT = 150;       // 偷分道具金額
 const GRACE_MS = 350;        // 網絡延遲寬限
-const FORFEIT_MS = 20000;    // 斷線多久判負
+const FORFEIT_MS = 45000;    // 斷線多久判負
 const MAX_POWERS = 2;        // 最多同時持有道具
+const POWERS = ['fifty', 'freeze', 'steal'];  // 道具種類
 
 export class GameRoom {
   constructor(state, env) {
@@ -33,6 +34,7 @@ export class GameRoom {
     this.pausedFrom = null;
     this.pausedRemain = 0;
     this.hostSlot = 0;
+    this.lastResult = null;
   }
 
   clearTimers() {
@@ -48,7 +50,11 @@ export class GameRoom {
     const pair = new WebSocketPair();
     const server = pair[1];
     server.accept();
-    server.addEventListener('message', (e) => this.onMessage(server, e.data));
+    server.addEventListener('message', (e) => {
+      // 任何單一訊息出錯都唔可以令成條線死掉
+      try { this.onMessage(server, e.data); }
+      catch (err) { console.error('onMessage error:', err); }
+    });
     server.addEventListener('close', () => this.onClose(server));
     return new Response(null, { status: 101, webSocket: pair[0] });
   }
@@ -139,7 +145,8 @@ export class GameRoom {
     this.send(ws, {
       type: 'init', slot, sid, hostSlot: this.hostSlot,
       phase: this.phase === 'paused' ? 'paused' : this.phase,
-      players: this.publicPlayers()
+      players: this.publicPlayers(),
+      ...(this.phase === 'over' && this.lastResult ? this.lastResult : {})
     });
     this.pushLobby();
 
@@ -163,7 +170,8 @@ export class GameRoom {
       phase: this.phase, players: this.publicPlayers(),
       ...(this.phase === 'question'
         ? this.questionPayload(Math.max(500, this.deadline - Date.now()))
-        : {})
+        : {}),
+      ...(this.phase === 'over' && this.lastResult ? this.lastResult : {})
     });
 
     if (this.phase === 'paused') this.unpause();
@@ -195,7 +203,10 @@ export class GameRoom {
     } else {
       this.resetIfEmptySoon();
     }
-    this.pushLobby();
+    // 比賽進行中唔好廣播 lobby，否則仲連住線嗰方會被彈返去大廳
+    if (this.phase === 'waiting' || this.phase === 'over') {
+      this.pushLobby();
+    }
   }
 
   // ---------- 遊戲流程 ----------
@@ -370,12 +381,13 @@ export class GameRoom {
       }
       report[p.slot] = worst ? worst.cat : null;
     }
-    this.broadcast({
+    this.lastResult = {
       type: 'gameOver',
       winner, reason,
       players: this.publicPlayers(),
       weakCat: report
-    });
+    };
+    this.broadcast(this.lastResult);
   }
 
   // ---------- 道具 ----------
