@@ -1,10 +1,18 @@
 import { GameRoom } from './room.js';
+import { buildDeck } from './questions.js';
 
 export { GameRoom };
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    // 單人練習模式：隨機抽一套題目（連答案，自行批改）
+    if (url.pathname === '/api/deck') {
+      return new Response(JSON.stringify({ deck: buildDeck(10) }), {
+        headers: { 'content-type': 'application/json; charset=utf-8' }
+      });
+    }
 
     // WebSocket：轉交畀對應房間嘅 Durable Object
     if (url.pathname === '/api/ws') {

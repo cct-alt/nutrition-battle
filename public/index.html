@@ -20,10 +20,12 @@
     <div class="card home-card">
       <input id="nameInput" maxlength="12" placeholder="你嘅名字／暱稱" autocomplete="off" />
       <button id="btnCreate" class="btn btn-primary big">🎮 建立房間</button>
+      <button id="btnPractice" class="btn btn-alt big">🎯 單人練習模式</button>
       <div class="join-row">
         <input id="codeInput" maxlength="4" placeholder="房號" autocapitalize="characters" autocomplete="off" />
         <button id="btnJoin" class="btn btn-secondary">加入房間</button>
       </div>
+      <button id="btnStudy" class="btn btn-ghost small">📖 溫習範圍</button>
       <p class="hint">建立後將 4 位房號話俾對方知，佢輸入即可加入</p>
     </div>
     <div class="rules">
@@ -101,10 +103,97 @@
       <div class="fscore opp"><span class="fname"></span><b class="fpts">0</b></div>
     </div>
     <div id="weakTip" class="weaktip hidden"></div>
+    <div id="bestLine" class="bestline hidden"></div>
+    <div id="reviewBox" class="review hidden"></div>
     <div class="overbtns">
       <button id="btnRematch" class="btn btn-primary big">🔁 再嚟一舖！</button>
+      <button id="btnStudyOver" class="btn btn-ghost small">📖 溫習範圍</button>
       <button id="btnHomeOver" class="btn btn-ghost small">返回主頁</button>
     </div>
+  </section>
+
+  <!-- ===== 溫習頁 ===== -->
+  <section id="screen-study" class="screen">
+    <h1 class="study-title">📖 溫習範圍</h1>
+    <div class="study-scroll">
+      <div class="scard"><h3>🍚 澱粉（碳水化合物）</h3>
+        <p class="srow"><b>食物來源：</b>米、麵包、馬鈴薯、穀類、意大利粉、麥片、餅乾、麵粉</p>
+        <p class="srow"><b>功能：</b>分解成葡萄糖；身體細胞進行呼吸作用，把葡萄糖分解以釋放能量，支持身體進行各項活動</p>
+      </div>
+      <div class="scard"><h3>🍫 糖（碳水化合物）</h3>
+        <p class="srow"><b>食物來源：</b>水果、朱古力、糖果、糕餅</p>
+        <p class="srow"><b>功能：</b>身體細胞進行呼吸作用，把葡萄糖分解以釋放能量，支持身體進行各項活動</p>
+      </div>
+      <div class="scard"><h3>🧈 脂肪（脂質）</h3>
+        <p class="srow"><b>食物來源：</b>肉類、豬油、牛油和芝士</p>
+        <p class="srow"><b>功能：</b>① 能量儲備——缺乏碳水化合物時，消耗儲藏的脂質來提供能量　② 保持體溫——皮膚下的脂質是良好隔熱層，減少熱的散失　③ 保護器官——內臟周圍的脂質作為軟墊，吸收震盪　④ 合成細胞膜</p>
+      </div>
+      <div class="scard"><h3>🫒 油（脂質）</h3>
+        <p class="srow"><b>食物來源：</b>花生油、粟米油和芥花籽油</p>
+        <p class="srow"><b>功能：</b>與脂肪相同（能量儲備、保持體溫、保護器官、合成細胞膜）</p>
+      </div>
+      <div class="scard"><h3>🥚 蛋白質</h3>
+        <p class="srow"><b>食物來源：</b>魚類、肉類、蛋類、奶類、芝士及豆類食品</p>
+        <p class="srow"><b>功能：</b>身體組織（肌肉、骨骼、皮膚、毛髮、血液）的主要成分；對生長和修補破損組織非常重要</p>
+        <p class="srow bad"><b>缺乏病：</b>蛋白缺乏病——肌肉萎縮、腹部因水腫而脹大、身體瘦弱、智力發展受影響</p>
+      </div>
+      <div class="scard"><h3>🥕 維生素A</h3>
+        <p class="srow"><b>食物來源：</b>奶類製品、胡蘿蔔、魚肝油和深綠色蔬菜</p>
+        <p class="srow"><b>功能：</b>有助在昏暗環境下觀看事物；增強免疫力</p>
+        <p class="srow bad"><b>缺乏病：</b>夜盲症——昏暗環境下很難清楚看見物體</p>
+      </div>
+      <div class="scard"><h3>🍊 維生素C</h3>
+        <p class="srow"><b>食物來源：</b>新鮮水果和蔬菜</p>
+        <p class="srow"><b>功能：</b>維持皮膚和牙齦的健康；幫助傷口癒合</p>
+        <p class="srow bad"><b>缺乏病：</b>壞血病——牙齦出血及傷口很難癒合</p>
+      </div>
+      <div class="scard"><h3>🍳 維生素D</h3>
+        <p class="srow"><b>食物來源：</b>奶類、魚肝油及蛋黃</p>
+        <p class="srow"><b>功能：</b>維持骨骼和牙齒的健康</p>
+        <p class="srow bad"><b>缺乏病：</b>佝僂病——骨骼變軟和彎曲</p>
+      </div>
+      <div class="scard"><h3>🥛 鈣</h3>
+        <p class="srow"><b>食物來源：</b>奶類製品、深綠色蔬菜及黃豆</p>
+        <p class="srow"><b>功能：</b>骨骼和牙齒的主要成分；幫助凝血</p>
+        <p class="srow bad"><b>缺乏病：</b>兒童→佝僂病；成年人→骨質疏鬆症（骨骼變得脆弱）</p>
+      </div>
+      <div class="scard"><h3>🩸 鐵</h3>
+        <p class="srow"><b>食物來源：</b>紅肉、肝臟、果仁及深綠色蔬菜</p>
+        <p class="srow"><b>功能：</b>合成紅血細胞內的血紅蛋白</p>
+        <p class="srow bad"><b>缺乏病：</b>貧血——紅血細胞數目比正常人低，面色蒼白、容易疲倦、頭暈</p>
+      </div>
+      <div class="scard"><h3>🦪 碘</h3>
+        <p class="srow"><b>食物來源：</b>海鮮和海藻</p>
+        <p class="srow"><b>功能：</b>維持甲狀腺的正常運作</p>
+        <p class="srow bad"><b>缺乏病：</b>甲狀腺腫——甲狀腺腫脹</p>
+      </div>
+      <div class="scard"><h3>🌾 食用纖維</h3>
+        <p class="srow"><b>食物來源：</b>水果、蔬菜、麥片及全麥穀類</p>
+        <p class="srow"><b>功能：</b>在腸道內有相當體積，刺激腸壁肌肉收縮，促進腸道蠕動；吸收水分使糞便變軟，更容易排出</p>
+        <p class="srow bad"><b>缺乏病：</b>便秘</p>
+      </div>
+      <div class="scard"><h3>💧 水</h3>
+        <p class="srow"><b>食物來源：</b>水、牛奶、果汁、茶或湯</p>
+        <p class="srow"><b>功能：</b>① 細胞質主要成分——細胞內化學反應的介質　② 血液主要成分——把物質運送到全身　③ 良好溶劑——把廢物溶解，隨尿液或汗液排出　④ 分泌物（如消化液）的主要成分　⑤ 汗水蒸發帶走熱，幫助調節體溫</p>
+        <p class="srow bad"><b>缺乏病：</b>消化不良、便秘</p>
+      </div>
+
+      <div class="scard"><h3>⚡ 缺乏病速記表（必背！）</h3>
+        <table class="sumtable">
+          <tr><th>營養素</th><th>缺乏病</th></tr>
+          <tr><td>蛋白質</td><td>蛋白缺乏病（肌肉萎縮、水腫、瘦弱）</td></tr>
+          <tr><td>維生素A</td><td>夜盲症</td></tr>
+          <tr><td>維生素C</td><td>壞血病</td></tr>
+          <tr><td>維生素D</td><td>佝僂病</td></tr>
+          <tr><td>鈣</td><td>佝僂病（兒童）／骨質疏鬆（成人）</td></tr>
+          <tr><td>鐵</td><td>貧血</td></tr>
+          <tr><td>碘</td><td>甲狀腺腫</td></tr>
+          <tr><td>食用纖維</td><td>便秘</td></tr>
+          <tr><td>水</td><td>消化不良、便秘</td></tr>
+        </table>
+      </div>
+    </div>
+    <button id="btnStudyBack" class="btn btn-primary small">返回</button>
   </section>
 
   <!-- ===== 覆蓋層 ===== -->
@@ -116,6 +205,7 @@
   <div id="toasts"></div>
 
   <button id="muteBtn" title="音效">🔊</button>
+  <button id="btnQuitPractice" class="btn btn-ghost small hidden">✕ 離開練習</button>
 
   <script src="app.js"></script>
 </body>

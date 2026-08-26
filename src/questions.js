@@ -94,3 +94,27 @@ export const QUESTIONS = [
   { c: 'MIN', q: '小美經常頭暈和疲倦，面色蒼白，醫生說她貧血，她應多吃？', o: ['紅肉和深綠色蔬菜', '朱古力和糖果', '薯片', '汽水'], a: 0 },
   { c: 'FIBER', q: '爺爺經常便秘，你建議他多吃？', o: ['蔬菜、水果和麥片', '芝士', '牛油', '蛋糕'], a: 0 }
 ];
+
+// ---------- 工具函數（伺服器與單人模式共用） ----------
+
+export function shuffleArr(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// 抽 n 題組成一套題目：隨機抽題 + 打亂選項次序（a 會自動對應新位置）
+export function buildDeck(n) {
+  const picked = shuffleArr([...QUESTIONS]).slice(0, n);
+  return picked.map((q) => {
+    const order = shuffleArr([0, 1, 2, 3].slice(0, q.o.length));
+    return {
+      c: q.c,
+      q: q.q,
+      options: order.map((i) => q.o[i]),
+      a: order.indexOf(q.a)
+    };
+  });
+}

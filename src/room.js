@@ -3,7 +3,7 @@
 // 每個房間一個實例：管理兩位玩家的 WebSocket、計時、計分、道具
 // 所有遊戲邏輯都在伺服器端執行，防止作弊（正確答案不會提早傳出）
 // ============================================================
-import { QUESTIONS } from './questions.js';
+import { buildDeck, shuffleArr } from './questions.js';
 
 const TOTAL_Q = 10;          // 每場題數
 const QUESTION_MS = 15000;   // 每題時限（毫秒）
@@ -487,27 +487,4 @@ export class GameRoom {
       if (p && p.ws) this.send(p.ws, obj);
     }
   }
-}
-
-// ---------- 工具函數 ----------
-
-function shuffleArr(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-function buildDeck(n) {
-  const picked = shuffleArr([...QUESTIONS]).slice(0, n);
-  return picked.map((q) => {
-    const order = shuffleArr([0, 1, 2, 3].slice(0, q.o.length));
-    return {
-      c: q.c,
-      q: q.q,
-      options: order.map((i) => q.o[i]),
-      a: order.indexOf(q.a)
-    };
-  });
 }

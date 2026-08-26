@@ -40,6 +40,21 @@ let rafId = null;
 let reconnTimer = null;
 let reconnTries = 0;
 
+/* ---------- 單人練習模式狀態 ---------- */
+const P = {
+  active: false,   // 正在練習中
+  mode: '',        // 'solo' | 'multi' — 決定賽後按鈕行為
+  deck: [],
+  qi: -1,
+  score: 0,
+  hp: 100,
+  combo: 0,
+  wrong: [],
+  stats: {},
+  answered: false,
+  deadline: 0
+};
+
 /* ---------- DOM 快取 ---------- */
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
@@ -334,6 +349,11 @@ function renderLobbySlots() {
 }
 
 function onMatchStart(m) {
+  P.active = false;
+  P.mode = 'multi';
+  $('#hudOpp').classList.remove('hidden');
+  document.querySelector('.powerdock').classList.remove('hidden');
+  $('#btnQuitPractice').classList.add('hidden');
   onPlayers(m.players);
   $('#pauseOverlay').classList.add('hidden');
   showScreen('game');
@@ -402,6 +422,7 @@ function timerLoop() {
 
   if (remain <= 0) {
     fill.style.width = '0%';
+    if (P.active && !P.answered) revealPQ(-1);
     return;
   }
   rafId = requestAnimationFrame(timerLoop);
@@ -415,6 +436,21 @@ $$('.opt').forEach((b) => {
   b.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     if (S.locked || S.phase !== 'game') return;
+
+    // 單人練習模式：本地即時批改，不經伺服器
+    if (P.active) {
+      if (P.answered) return;
+      const i = b.dataset.i | 0;
+      P.answered = true;
+      S.myChoice = i;
+      S.locked = true;
+      FX.tone(700, 0.06, 'sine', 0.12);
+      b.classList.add('picked');
+      $$('.opt').forEach((o) => { if (o !== b) o.classList.add('dimmed'); });
+      revealPQ(i);
+      return;
+    }
+
     const i = b.dataset.i | 0;
     if (S.removed.includes(i)) return;
     S.myChoice = i;
@@ -548,6 +584,10 @@ function onGameOver(m) {
   onPlayers(m.players);
   $('#pauseOverlay').classList.add('hidden');
   $('#countOverlay').classList.add('hidden');
+  $('#bestLine').classList.add('hidden');
+  $('#reviewBox').classList.add('hidden');
+  document.querySelector('.fscore.opp').classList.remove('hidden');
+  document.querySelector('.finals .vs').classList.remove('hidden');
 
   const won = m.winner === S.slot;
   const draw = m.winner === -1;
@@ -604,6 +644,160 @@ function onError(m) {
   backHome(m.msg || '無法加入房間');
 }
 
+/* ---------- 單人練習模式 ---------- */
+async function startPractice() {
+  P.active = true;
+  P.mode = 'solo';
+  P.qi = -1;
+  P.score = 0;
+  P.hp = 100;
+  P.combo = 0;
+  P.wrong = [];
+  P.stats = {};
+  P.answered = false;
+  S.slot = 0;
+  S.players = [{ slot: 0, name: (S.name || '你') + '（練習）', score: 0, hp: 100, combo: 0, powers: [], connected: true }, null];
+
+  $('#hudOpp').classList.add('hidden');
+  document.querySelector('.powerdock').classList.add('hidden');
+  $('#btnQuitPractice').classList.remove('hidden');
+  showScreen('game');
+  renderHUD();
+  $('#notice').textContent = '載入題目中…';
+
+  try {
+    const r = await fetch('/api/deck');
+    if (!r.ok) throw new Error('bad status');
+    const data = await r.json();
+    P.deck = data.deck;
+  } catch (err) {
+    P.active = false;
+    toast('載入題目失敗，請檢查網絡');
+    showScreen('home');
+    return;
+  }
+  nextPQ();
+}
+
+function nextPQ() {
+  P.qi += 1;
+  if (P.qi >= P.deck.length) { endPractice(); return; }
+  P.answered = false;
+  S.locked = false;
+  S.myChoice = -1;
+  S.removed = [];
+  const q = P.deck[P.qi];
+  onQuestion({
+    qi: P.qi,
+    total: P.deck.length,
+    cat: q.c,
+    text: q.q,
+    options: q.options,
+    endsIn: 15000,
+    double: P.qi === P.deck.length - 1
+  });
+  P.deadline = performance.now() + 15000;
+}
+
+function revealPQ(choice) {
+  stopTimer();
+  const q = P.deck[P.qi];
+  const correct = choice === q.a;
+  const st = P.stats[q.c] || (P.stats[q.c] = [0, 0]);
+  st[1] += 1;
+
+  $$('.opt').forEach((o) => o.classList.add('lockedall'));
+  const correctBtn = $(`.opt[data-i="${q.a}"]`);
+  if (correctBtn) correctBtn.classList.add('correct');
+
+  if (correct) {
+    P.combo += 1;
+    st[0] += 1;
+    const frac = Math.max(0, P.deadline - performance.now()) / 15000;
+    const mult = 1 + 0.25 * Math.min(P.combo - 1, 4);
+    let gain = Math.round((100 + Math.round(100 * frac)) * mult);
+    if (P.qi === P.deck.length - 1) gain *= 2;
+    P.score += gain;
+    FX.ok();
+    $('#notice').textContent = `⚡ 答對 +${gain} 分${mult > 1 ? `（連擊 ×${mult}）` : ''}${P.qi === P.deck.length - 1 ? ' 🔥終極題加倍🔥' : ''}`;
+  } else if (choice === -1) {
+    FX.bad();
+    $('#notice').textContent = '⏰ 時間到！';
+  } else {
+    P.combo = 0;
+    P.hp -= 20;
+    FX.bad();
+    const btn = $(`.opt[data-i="${choice}"]`);
+    if (btn) btn.classList.add('wrongpick');
+    if (P.hp <= 0) {
+      P.hp = 0;
+      $('#notice').textContent = '💀 血量歸零，練習結束！';
+    } else {
+      $('#notice').textContent = '❌ 答錯！扣血 -20';
+    }
+  }
+
+  if (!correct) P.wrong.push(q);
+  S.players[0].score = P.score;
+  S.players[0].hp = Math.max(0, P.hp);
+  S.players[0].combo = P.combo;
+  renderHUD();
+
+  if (!correct && P.hp <= 0) {
+    setTimeout(endPractice, 1800);
+    return;
+  }
+  setTimeout(() => { if (P.active) nextPQ(); }, 2000);
+}
+
+function endPractice() {
+  stopTimer();
+  P.active = false;
+  P.mode = 'solo';
+  $('#btnQuitPractice').classList.add('hidden');
+
+  const best = Number(localStorage.getItem('nb_best') || '0');
+  const isBest = P.score > best;
+  if (isBest) localStorage.setItem('nb_best', String(P.score));
+
+  $('#overBanner').textContent = isBest ? '🏅 新個人紀錄！' : '📋 練習完成';
+  $('#bestLine').textContent = `今次得分：${P.score}　·　本機最高分：${Math.max(best, P.score)}`;
+  $('#bestLine').classList.remove('hidden');
+
+  document.querySelector('.fscore.opp').classList.add('hidden');
+  document.querySelector('.finals .vs').classList.add('hidden');
+  $('.fscore.me .fname').textContent = S.name || '你';
+  $('.fscore.me .fpts').textContent = P.score;
+
+  let worst = null;
+  for (const [cat, arr] of Object.entries(P.stats)) {
+    if (arr[1] < 2) continue;
+    const r = 1 - arr[0] / arr[1];
+    if (!worst || r > worst.r) worst = { cat, r };
+  }
+  const tip = $('#weakTip');
+  if (worst) {
+    tip.textContent = `📚 你最弱嘅環節係「${CAT_LABELS[worst.cat] || worst.cat}」，撳下面「溫習範圍」睇返呢部分！`;
+    tip.classList.remove('hidden');
+  } else {
+    tip.classList.add('hidden');
+  }
+
+  const rb = $('#reviewBox');
+  if (P.wrong.length) {
+    rb.innerHTML = '<h3>❌ 錯題重溫（' + P.wrong.length + ' 題）</h3>' +
+      P.wrong.map((q) =>
+        `<div class="ritem"><div class="rq">${q.q}</div><div class="ra">✔ 正確答案：${q.options[q.a]}</div></div>`
+      ).join('');
+    rb.classList.remove('hidden');
+  } else {
+    rb.classList.add('hidden');
+  }
+
+  showScreen('over');
+  if (isBest) { confetti(); FX.win(); } else { FX.ok(); }
+}
+
 /* ---------- 主頁互動 ---------- */
 $('#nameInput').value = localStorage.getItem('nb_name') || '';
 
@@ -625,6 +819,25 @@ $('#btnCreate').addEventListener('click', () => {
   reconnTries = 0;
   localStorage.removeItem(sessKey(S.code));
   connect(genCode(), { freshJoin: true });
+});
+
+$('#btnPractice').addEventListener('click', () => {
+  if (!readName()) return;
+  startPractice();
+});
+
+$('#btnStudy').addEventListener('click', () => showScreen('study'));
+$('#btnStudyOver').addEventListener('click', () => showScreen('study'));
+$('#btnStudyBack').addEventListener('click', () => showScreen('home'));
+
+$('#btnQuitPractice').addEventListener('click', () => {
+  P.active = false;
+  P.mode = '';
+  stopTimer();
+  $('#hudOpp').classList.remove('hidden');
+  document.querySelector('.powerdock').classList.remove('hidden');
+  $('#btnQuitPractice').classList.add('hidden');
+  showScreen('home');
 });
 
 $('#btnJoin').addEventListener('click', () => {
@@ -650,10 +863,18 @@ $('#btnLeaveLobby').addEventListener('click', () => backHome());
 
 /* ---------- 結果 ---------- */
 $('#btnRematch').addEventListener('click', () => {
+  if (P.mode === 'solo') { startPractice(); return; }
   send({ type: 'start' });
   toast('等緊開波…');
 });
 $('#btnHomeOver').addEventListener('click', () => {
+  if (P.mode === 'solo') {
+    P.mode = '';
+    $('#hudOpp').classList.remove('hidden');
+    document.querySelector('.powerdock').classList.remove('hidden');
+    showScreen('home');
+    return;
+  }
   localStorage.removeItem(sessKey(S.code));
   backHome();
 });
