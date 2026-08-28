@@ -488,3 +488,74 @@ export class GameRoom {
     }
   }
 }
+
+/* ---------- 排行榜 Durable Object ---------- */
+export class Leaderboard {
+  constructor(state, env) {
+    this.state = state;
+  }
+
+  async fetch(request) {
+    const url = new URL(request.url);
+    const method = request.method;
+
+    if (url.pathname === '/api/leaderboard') {
+      if (request.method === 'POST') {
+        return this.handleSubmit(request);
+      } else if (request.method === 'GET') {
+        return this.handleFetch(request);
+      }
+    }
+    return new Response('Not found', { status: 404 });
+  }
+
+  async handleSubmit(request) {
+    try {
+      const { mode, score, class: className, studentId } = await request.json();
+      if (!mode || !['solo', 'multi'].includes(mode) || !score || !studentId) {
+        return new Response(JSON.stringify({ error: 'Invalid payload' }), { status: 400 });
+      }
+
+      const key = `lb:${mode}`;
+      const list = await this.state.storage.get(key) || [];
+      
+      const entry = {
+        name: '',
+        score: Math.floor(score),
+        class: '',
+        studentId: String(studentId),
+        timestamp: Date.now()
+      };
+
+      const playerKey = `player:${studentId}`;
+      const playerData = await this.state.storage.get(playerKey) || { name: '', class: '' };
+      
+      entry.name = playerData.name || `學生${studentId}`;
+      entry.class = playerData.class || '';
+
+      list.push(entry);
+      list.sort((a, b) => b.score - a.score);
+      if (list.length > 100) list.length = 100;
+      
+      await this.state.storage.put(`lb:${mode}`, list);
+      return new Response(JSON.stringify({ success: true }), { 
+        headers: { 'content-type': 'application/json' } 
+      });
+    } catch (err) {
+      return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+    }
+  }
+
+  async handleFetch(request) {
+    const url = new URL(request.url);
+    const mode = url.searchParams.get('mode') || 'multi';
+    const limit = Math.min(parseInt(url.searchParams.get('limit') || '20'), 100);
+    
+    const list = await this.state.storage.get(`lb:${mode}`) || [];
+    const top = list.slice(0, limit);
+    
+    return new Response(JSON.stringify(top), {
+      headers: { 'content-type': 'application/json' }
+    });
+  }
+}

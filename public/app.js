@@ -186,7 +186,7 @@ function connect(code, opts = {}) {
       S.sid = sess.sid;
       send({ type: 'resume', sid: sess.sid });
     } else {
-      send({ type: 'join', role: S.role, name: S.name });
+      send({ type: 'join', role: S.role, name: S.name, class: S.class, studentId: S.studentId });
     }
   };
 
@@ -617,6 +617,10 @@ function onGameOver(m) {
 
   showScreen('over');
   renderPowers();
+  // 提交分數到排行榜（雙人模式）
+  if (S.class && S.studentId) {
+    submitScore('multi', (me() || {}).score || 0, S.class, S.studentId);
+  }
   if (won) { FX.win(); confetti(); } else if (draw) { FX.ok(); } else { FX.lose(); }
 }
 
@@ -760,6 +764,9 @@ function endPractice() {
   const isBest = P.score > best;
   if (isBest) localStorage.setItem('nb_best', String(P.score));
 
+  // 提交分數到排行榜
+  submitScore('solo', P.score, S.class, S.studentId);
+
   $('#overBanner').textContent = isBest ? '🏅 新個人紀錄！' : '📋 練習完成';
   $('#bestLine').textContent = `今次得分：${P.score}　·　本機最高分：${Math.max(best, P.score)}`;
   $('#bestLine').classList.remove('hidden');
@@ -808,8 +815,24 @@ function readName() {
     $('#nameInput').focus();
     return null;
   }
+  const cls = $('#classSelect').value;
+  if (!cls) {
+    toast('請選擇班別！');
+    $('#classSelect').focus();
+    return null;
+  }
+  const sid = parseInt($('#studentIdInput').value, 10);
+  if (isNaN(sid) || sid < 1 || sid > 40) {
+    toast('請輸入有效學號 (1-40)！');
+    $('#studentIdInput').focus();
+    return null;
+  }
   localStorage.setItem('nb_name', n);
+  localStorage.setItem('nb_class', cls);
+  localStorage.setItem('nb_student_id', String(sid));
   S.name = n;
+  S.class = cls;
+  S.studentId = sid;
   return n;
 }
 
@@ -829,6 +852,12 @@ $('#btnPractice').addEventListener('click', () => {
 $('#btnStudy').addEventListener('click', () => showScreen('study'));
 $('#btnStudyOver').addEventListener('click', () => showScreen('study'));
 $('#btnStudyBack').addEventListener('click', () => showScreen('home'));
+$('#btnLeaderboard').addEventListener('click', showLeaderboard);
+$('#btnLeaderboardOver').addEventListener('click', showLeaderboard);
+$('#btnLeaderboardBack').addEventListener('click', () => showScreen('home'));
+
+$('#tabMulti').addEventListener('click', () => loadLeaderboard('multi'));
+$('#tabSolo').addEventListener('click', () => loadLeaderboard('solo'));
 
 $('#btnQuitPractice').addEventListener('click', () => {
   P.active = false;
@@ -881,3 +910,65 @@ $('#btnHomeOver').addEventListener('click', () => {
 
 /* 防止 iOS 雙擊縮放／長按選字 */
 document.addEventListener('dblclick', (e) => e.preventDefault(), { passive: false });
+
+/* ---------- 排行榜 API ---------- */
+async function submitScore(mode, score, className, studentId) {
+  try {
+    const r = await fetch('/api/leaderboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode, score, class: className, studentId })
+    });
+    if (!r.ok) throw new Error('submit failed');
+    return await r.json();
+  } catch (e) {
+    console.error('submitScore error:', e);
+  }
+}
+
+async function fetchLeaderboard(mode) {
+  try {
+    const r = await fetch(`/api/leaderboard?mode=${mode}&limit=20`);
+    if (!r.ok) throw new Error('fetch failed');
+    return await r.json();
+  } catch (e) {
+    console.error('fetchLeaderboard error:', e);
+    return [];
+  }
+}
+
+function renderLeaderboard(data, mode) {
+  const list = $('#leaderboardList');
+  if (!data.length) {
+    $('#leaderboardList').innerHTML = '<div class="leaderboard-empty">暫無紀錄</div>';
+    return;
+  }
+  $('#leaderboardList').innerHTML = data.map((entry, i) => {
+    const rank = i + 1;
+    const rankClass = rank <= 3 ? `rank${rank}` : '';
+    return `
+      <div class="leaderboard-item ${rank <= 3 ? `rank${rank}` : ''}">
+        <div class="lb-rank ${rank <= 3 ? `rank${rank}` : ''}">${i + 1}</div>
+        <div class="lb-name">${escapeHtml(entry.name)}</div>
+        <div class="lb-class">${entry.class}班 ${entry.studentId}號</div>
+        <div class="lb-score">${entry.score}</div>
+      </div>
+    `).join('');
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+async function loadLeaderboard(mode) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  const data = await fetchLeaderboard(mode);
+  renderLeaderboard(data, mode);
+}
+
+function showLeaderboard() {
+  showScreen('leaderboard');
+  loadLeaderboard('multi');
+}

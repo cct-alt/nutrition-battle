@@ -1,11 +1,19 @@
 import { GameRoom } from './room.js';
+import { Leaderboard } from './room.js';
 import { buildDeck } from './questions.js';
 
-export { GameRoom };
+export { GameRoom, Leaderboard };
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    // 排行榜 API
+    if (url.pathname === '/api/leaderboard') {
+      const id = env.GAME_ROOM.idFromName('LEADERBOARD_GLOBAL');
+      const stub = env.GAME_ROOM.get(id);
+      return stub.fetch(request);
+    }
 
     // 單人練習模式：隨機抽一套題目（連答案，自行批改）
     if (url.pathname === '/api/deck') {

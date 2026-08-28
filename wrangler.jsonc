@@ -4,21 +4,20 @@
   "main": "src/index.js",
   "compatibility_date": "2025-05-01",
 
-  // 前端靜態檔案（public 資料夾會自動發佈）
   "assets": {
     "directory": "./public",
     "binding": "ASSETS"
   },
 
-  // Durable Object：每個房間一個實例，管理兩位玩家的實時對戰
   "durable_objects": {
     "bindings": [
-      { "name": "GAME_ROOM", "class_name": "GameRoom" }
+      { "name": "GAME_ROOM", "class_name": "GameRoom" },
+      { "name": "LEADERBOARD", "class_name": "Leaderboard" }
     ]
   },
 
-  // SQLite 版 DO（免費計劃可用）
   "migrations": [
-    { "tag": "v1", "new_sqlite_classes": ["GameRoom"] }
+    { "tag": "v1", "new_sqlite_classes": ["GameRoom"] },
+    { "tag": "v2", "new_sqlite_classes": ["Leaderboard"] }
   ]
 }

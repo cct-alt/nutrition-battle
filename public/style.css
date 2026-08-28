@@ -83,6 +83,14 @@ input:focus { border-color: var(--accent); }
 .btn-ghost { background: transparent; border: 1px solid var(--line); color: var(--dim); }
 .btn:disabled { filter: grayscale(.8) brightness(.6); pointer-events: none; }
 
+/* ---------- 班別/學號輸入 ---------- */
+.class-student-row { display: flex; gap: 10px; margin-bottom: 8px; }
+.class-student-row select, .class-student-row input {
+  flex: 1; height: 50px; border-radius: 12px; border: 1px solid var(--line);
+  background: rgba(0,0,0,.25); color: var(--text); font-size: 18px; text-align: center; outline: none;
+}
+.class-student-row select:focus, .class-student-row input:focus { border-color: var(--accent); }
+
 /* ---------- 等待室 ---------- */
 .lobby-label { color: var(--dim); letter-spacing: 4px; }
 .room-code {
@@ -139,14 +147,15 @@ input:focus { border-color: var(--accent); }
 .chip.double { background: #ff4d5a33; color: #ff8a99; border: 1px solid #ff4d5a66; }
 .chip.buzz { background: #ffb02033; color: #ffd166; border: 1px solid #ffb02066; animation: flashY .6s ease infinite; }
 .hidden { display: none !important; }
-#qText { font-size: clamp(19px, 3.2vh, 27px); font-weight: 800; line-height: 1.45; }
+#qText { font-size: clamp(23px, 4vh, 32px); font-weight: 800; line-height: 1.5; }
+.notice { min-height: 24px; font-size: 18px; color: var(--accent); font-weight: 700; text-align: center; }
 
-.options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; flex: 1; min-height: 0; }
+.options { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; flex: 1; min-height: 0; }
 .opt {
-  display: flex; align-items: center; gap: 12px; padding: 10px 14px;
-  border: none; border-radius: 18px; cursor: pointer; text-align: left;
-  color: #fff; font-size: clamp(17px, 2.4vh, 22px); font-weight: 800;
-  min-height: 64px; transition: transform .07s, filter .2s, opacity .2s;
+  display: flex; align-items: center; gap: 14px; padding: 14px 18px;
+  border: none; border-radius: 20px; cursor: pointer; text-align: left;
+  color: #fff; font-size: clamp(20px, 3vh, 26px); font-weight: 800;
+  min-height: 76px; transition: transform .07s, filter .2s, opacity .2s;
 }
 .opt:nth-child(1) { background: linear-gradient(180deg, #4aa3ff, #2568d9); box-shadow: 0 5px 0 #163f85; }
 .opt:nth-child(2) { background: linear-gradient(180deg, #47d97a, #21a052); box-shadow: 0 5px 0 #146032; }
@@ -178,6 +187,35 @@ input:focus { border-color: var(--accent); }
 }
 .pw.off { opacity: .35; pointer-events: none; }
 
+/* ---------- 排行榜 ---------- */
+.leaderboard-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+.tab-btn {
+  flex: 1; padding: 12px; border: 1px solid var(--line); background: var(--card);
+  border-radius: 12px; color: var(--dim); font-size: 17px; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+}
+.tab-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+.leaderboard-list { display: flex; flex-direction: column; gap: 8px; }
+.leaderboard-item {
+  display: grid; grid-template-columns: 50px 1fr 100px 100px; gap: 10px;
+  padding: 12px 14px; background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; font-size: 16px; align-items: center;
+}
+.leaderboard-item.rank1 { border-color: #ffb020; background: #ffb02018; }
+.leaderboard-item.rank2 { border-color: #aaa; background: #aaa18; }
+.leaderboard-item.rank3 { border-color: #cd7f32; background: #cd7f3218; }
+.lb-rank { font-weight: 900; font-size: 20px; text-align: center; }
+.lb-rank.rank1 { color: #ffb020; }
+.lb-rank.rank2 { color: #aaa; }
+.lb-rank.rank3 { color: #cd7f32; }
+.lb-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; }
+.lb-class { text-align: center; color: var(--accent); font-weight: 700; font-size: 14px; }
+.lb-score { text-align: right; font-weight: 900; font-size: 20px; color: var(--accent); }
+.leaderboard-empty { text-align: center; color: var(--dim); padding: 20px; font-size: 17px; }
+
+/* ---------- 高亮標記 ---------- */
+mark { background: #ffb020; color: #1a1a1a; padding: 2px 6px; border-radius: 4px; font-weight: 900; }
+
 /* ---------- 結果 ---------- */
 .over-banner { font-size: clamp(46px, 10vh, 90px); line-height: 1.2; }
 .finals { display: flex; align-items: center; gap: 16px; }
@@ -188,11 +226,11 @@ input:focus { border-color: var(--accent); }
 .fscore b { display: block; font-size: 40px; margin-top: 4px; }
 .fscore.me { border-color: #2ecc7188; }
 .weaktip {
-  max-width: 480px; text-align: center; font-size: 16px; line-height: 1.6;
+  max-width: 480px; text-align: center; font-size: 17px; line-height: 1.7;
   background: #ffb02018; border: 1px dashed #ffb02066; color: #ffd894;
-  border-radius: 14px; padding: 12px 16px;
+  border-radius: 14px; padding: 14px 18px;
 }
-.overbtns { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.overbtns { display: flex; flex-direction: column; align-items: center; gap: 12px; }
 
 /* ---------- 溫習頁 ---------- */
 .study-title { font-size: clamp(28px, 5vw, 40px); font-weight: 900; }
@@ -203,14 +241,18 @@ input:focus { border-color: var(--accent); }
   padding: 4px 4px 10px;
 }
 .scard { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 16px; flex-shrink: 0; }
-.scard h3 { font-size: 18px; margin-bottom: 6px; }
-.srow { font-size: 15px; line-height: 1.6; color: #e8e8f5; margin: 3px 0; }
+.scard h3 { font-size: 20px; margin-bottom: 8px; }
+.srow { font-size: 16px; line-height: 1.7; color: #e8e8f5; margin: 5px 0; }
 .srow b { color: var(--accent); font-weight: 800; }
 .srow.bad b { color: #ff8a99; }
-.sumtable { width: 100%; border-collapse: collapse; font-size: 15px; }
+.scard h3 mark, .srow mark {
+  background: #ffb020; color: #1a1a1a; padding: 2px 6px; border-radius: 4px; font-weight: 900;
+}
+.sumtable { width: 100%; border-collapse: collapse; font-size: 16px; }
 .sumtable th, .sumtable td { border-bottom: 1px solid var(--line); padding: 9px 10px; text-align: left; }
 .sumtable tr:last-child td { border-bottom: none; }
 .sumtable th { color: var(--accent); }
+.sumtable mark { background: #ffb020; color: #1a1a1a; padding: 2px 6px; border-radius: 4px; }
 
 /* ---------- 練習模式賽後 ---------- */
 .bestline { font-size: 18px; font-weight: 800; color: #ffd166; }
