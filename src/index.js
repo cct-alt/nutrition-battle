@@ -1,7 +1,8 @@
 import { GameRoom } from './room.js';
 import { buildDeck } from './questions.js';
+import { Leaderboard } from './room.js';
 
-export { GameRoom };
+export { GameRoom, Leaderboard };
 
 export default {
   async fetch(request, env) {
