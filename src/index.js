@@ -9,8 +9,8 @@ export default {
 
     // 排行榜 API - 必須在 /api/ws 之前
     if (url.pathname === '/api/leaderboard') {
-      const id = env.GAME_ROOM.idFromName('LEADERBOARD_GLOBAL');
-      const stub = env.GAME_ROOM.get(id);
+      const id = env.LEADERBOARD.idFromName('LEADERBOARD_GLOBAL');
+      const stub = env.LEADERBOARD.get(id);
       return stub.fetch(request);
     }
 
