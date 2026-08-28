@@ -512,7 +512,7 @@ export class Leaderboard {
   async handleSubmit(request) {
     try {
       const { mode, score, class: className, studentId } = await request.json();
-      if (!mode || !['solo', 'multi'].includes(mode) || !score || !studentId) {
+      if (!mode || !['solo', 'multi'].includes(mode) || score === undefined || score === null || !studentId) {
         return new Response(JSON.stringify({ error: 'Invalid payload' }), { status: 400 });
       }
 
@@ -531,7 +531,6 @@ export class Leaderboard {
       const playerData = await this.state.storage.get(playerKey) || { name: '', class: '' };
       
       entry.name = playerData.name || `學生${studentId}`;
-      // 使用傳入的 className，如果沒有則用 playerData 的
       entry.class = className || playerData.class || '';
 
       list.push(entry);
