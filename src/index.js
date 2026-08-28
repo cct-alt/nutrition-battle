@@ -7,7 +7,7 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // 排行榜 API - 必須在 /api/ws 之前
+    // 排行榜 API - 必須在 /api/ws 之前，處理 GET/POST
     if (url.pathname === '/api/leaderboard') {
       const id = env.LEADERBOARD.idFromName('LEADERBOARD_GLOBAL');
       const stub = env.LEADERBOARD.get(id);
