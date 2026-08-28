@@ -522,7 +522,7 @@ export class Leaderboard {
       const entry = {
         name: '',
         score: Math.floor(score),
-        class: '',
+        class: className || '',
         studentId: String(studentId),
         timestamp: Date.now()
       };
@@ -531,7 +531,8 @@ export class Leaderboard {
       const playerData = await this.state.storage.get(playerKey) || { name: '', class: '' };
       
       entry.name = playerData.name || `學生${studentId}`;
-      entry.class = playerData.class || '';
+      // 使用傳入的 className，如果沒有則用 playerData 的
+      entry.class = className || playerData.class || '';
 
       list.push(entry);
       list.sort((a, b) => b.score - a.score);
