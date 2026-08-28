@@ -945,15 +945,14 @@ function renderLeaderboard(data, mode) {
   }
   $('#leaderboardList').innerHTML = data.map((entry, i) => {
     const rank = i + 1;
-    const rankClass = rank <= 3 ? `rank${rank}` : '';
-    return `
-      <div class="leaderboard-item ${rank <= 3 ? `rank${rank}` : ''}">
-        <div class="lb-rank ${rank <= 3 ? `rank${rank}` : ''}">${i + 1}</div>
-        <div class="lb-name">${escapeHtml(entry.name)}</div>
-        <div class="lb-class">${entry.class}班 ${entry.studentId}號</div>
-        <div class="lb-score">${entry.score}</div>
-      </div>
-    `).join('');
+    const rankClass = rank <= 3 ? 'rank' + rank : '';
+    return '<div class="leaderboard-item ' + (rank <= 3 ? 'rank' + rank : '') + '">' +
+      '<div class="lb-rank ' + (rank <= 3 ? 'rank' + rank : '') + '">' + (i + 1) + '</div>' +
+      '<div class="lb-name">' + escapeHtml(entry.name) + '</div>' +
+      '<div class="lb-class">' + entry.class + '班 ' + entry.studentId + '號</div>' +
+      '<div class="lb-score">' + entry.score + '</div>' +
+      '</div>';
+  }).join('');
 }
 
 function escapeHtml(text) {
