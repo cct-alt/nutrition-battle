@@ -972,3 +972,4 @@ function showLeaderboard() {
   showScreen('leaderboard');
   loadLeaderboard('multi');
 }
+}
