@@ -30,7 +30,7 @@
         <input id="studentIdInput" type="number" min="1" max="40" placeholder="學號 (1-40)" autocomplete="off" />
       </div>
       <button id="btnCreate" class="btn btn-primary big">🎮 建立房間</button>
-      <button id="btnPractice" class="btn btn-alt big">🎯 單人練習模式</button>
+      <button id="btnPractice" class="btn btn-alt big">🎯 單人計時模式</button>
       <div class="join-row">
         <input id="codeInput" maxlength="4" placeholder="房號" autocapitalize="characters" autocomplete="off" />
         <button id="btnJoin" class="btn btn-secondary">加入房間</button>
@@ -40,19 +40,31 @@
       <p class="hint">建立後將 4 位房號話俾對方知，佢輸入即可加入</p>
     </div>
     <div class="rules">
-      <span>⚡ 搶答越快，分數越高</span><span>🔥 三連擊有道具</span><span>❤️ 答答錯扣血，歸零即敗</span>
+      <span>⚡ 搶答越快，分數越高</span><span>🔥 三連擊有道具</span><span>❤️ 答錯扣血，歸零即敗</span>
+      <span>⏱️ 單人模式：答對加時、答錯扣時</span>
+    </div>
+    <div class="rules" style="font-size:12px;color:var(--dim);">
+      單人模式：限時 60 秒，答對 +5 秒，答錯 -3 秒，答對得分 = 基礎分 + 速度分 × 連擊倍數
     </div>
   </section>
 
   <!-- ===== 等待室 ===== -->
-  <section id="screen-lobby" class="screen">
+  <section id="screen-lobby" class="screen" style="overflow-y: auto;">
     <p class="lobby-label">房間號碼</p>
     <div id="roomCode" class="room-code">----</div>
     <p class="hint">對方開同一網址 → 輸入房號 → 加入</p>
     <div class="slots">
-      <div id="slot0" class="player-slot"><div class="avatar">🧑‍🎓</div><div class="pname">等待中…</div></div>
+      <div id="slot0" class="player-slot">
+        <div class="avatar">🧑‍🎓</div>
+        <div class="pname">等待中…</div>
+        <div class="pinfo"><span id="slot0Info"></span></div>
+      </div>
       <div class="vs">VS</div>
-      <div id="slot1" class="player-slot"><div class="avatar">🧑‍🎓</div><div class="pname">等待中…</div></div>
+      <div id="slot1" class="player-slot">
+        <div class="avatar">🧑‍🎓</div>
+        <div class="pname">等待中…</div>
+        <div class="pinfo"><span id="slot1Info"></span></div>
+      </div>
     </div>
     <button id="btnStart" class="btn btn-primary big" disabled>開始比賽！</button>
     <button id="btnLeaveLobby" class="btn btn-ghost small">離開</button>
@@ -135,6 +147,52 @@
       <div id="leaderboardList" class="leaderboard-list"></div>
     </div>
     <button id="btnLeaderboardBack" class="btn btn-primary small">返回</button>
+  </section>
+
+  <!-- ===== 單人計時模式 ===== -->
+  <section id="screen-timer" class="screen" style="overflow-y: auto;">
+    <h1 class="study-title">⏱️ 單人計時挑戰</h1>
+    <div class="timer-hud">
+      <div class="timer-circle">
+        <span id="timerSeconds" class="timer-seconds">60</span>
+        <span class="timer-label">秒</span>
+      </div>
+      <div class="timer-info">
+        <div class="timer-stat">
+          <span class="timer-label">分數</span>
+          <span id="timerScore" class="timer-value">0</span>
+        </div>
+        <div class="timer-stat">
+          <span class="timer-label">連擊</span>
+          <span id="timerCombo" class="timer-value">0</span>
+        </div>
+        <div class="timer-stat">
+          <span class="timer-label">答對/錯</span>
+          <span id="timerStats" class="timer-value">0/0</span>
+        </div>
+      </div>
+    </div>
+    <div class="timer-hint">答對 +5 秒 | 答錯 -3 秒 | 時間歸零結束</div>
+    <main class="qarea">
+      <div class="qcard">
+        <div class="qtags">
+          <span id="timerCat" class="chip"></span>
+          <span id="timerDouble" class="chip double hidden">🔥 雙倍分</span>
+        </div>
+        <h2 id="timerQText">載入中…</h2>
+      </div>
+      <div class="options">
+        <button class="opt" data-i="0"><span class="letter">A</span><span class="otext"></span></button>
+        <button class="opt" data-i="1"><span class="letter">B</span><span class="otext"></span></button>
+        <button class="opt" data-i="2"><span class="letter">C</span><span class="otext"></span></button>
+        <button class="opt" data-i="3"><span class="letter">D</span><span class="otext"></span></button>
+      </div>
+    </main>
+    <div id="timerNotice" class="notice"></div>
+    <div class="overbtns" style="margin-top: 20px;">
+      <button id="btnTimerRetry" class="btn btn-primary big">🔁 再試一次</button>
+      <button id="btnTimerHome" class="btn btn-ghost small">返回主頁</button>
+    </div>
   </section>
 
 <!-- ===== 溫習頁 ===== -->

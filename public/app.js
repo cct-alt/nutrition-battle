@@ -806,7 +806,7 @@ function endPractice() {
 }
 
 /* ---------- 主頁互動 ---------- */
-$('#nameInput').value = localStorage.getItem('nb_name') || '';
+// 不自動填入名字，讓每位同學自行輸入
 
 function readName() {
   const n = $('#nameInput').value.trim().slice(0, 12);
