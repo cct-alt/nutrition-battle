@@ -40,6 +40,7 @@ html, body {
   justify-content: center;
   gap: 14px;
   padding: calc(14px + var(--safe-t)) 18px calc(14px + var(--safe-b));
+  overflow-y: auto;
 }
 .screen.active { display: flex; }
 
@@ -57,6 +58,7 @@ html, body {
   backdrop-filter: blur(10px);
 }
 .home-card { display: flex; flex-direction: column; gap: 12px; }
+#screen-home { justify-content: flex-start; padding-top: calc(40px + var(--safe-t)); }
 input {
   width: 100%; height: 54px; border-radius: 14px; border: 1px solid var(--line);
   background: rgba(0,0,0,.25); color: var(--text);
@@ -212,6 +214,76 @@ input:focus { border-color: var(--accent); }
 .lb-class { text-align: center; color: var(--accent); font-weight: 700; font-size: 14px; }
 .lb-score { text-align: right; font-weight: 900; font-size: 20px; color: var(--accent); }
 .leaderboard-empty { text-align: center; color: var(--dim); padding: 20px; font-size: 17px; }
+
+/* ---------- 雙人對戰排行榜配對樣式 ---------- */
+.leaderboard-item.match-pair {
+  grid-template-columns: 50px 1fr 80px;
+}
+.leaderboard-item.match-pair .lb-match {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.leaderboard-item.match-pair .lb-player {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.leaderboard-item.match-pair .lb-player.winner .lb-name {
+  font-weight: 900;
+  color: var(--accent);
+}
+.leaderboard-item.match-pair .vs-badge {
+  font-weight: 900;
+  color: var(--accent);
+  font-size: 14px;
+  padding: 0 4px;
+}
+.leaderboard-item.match-pair .lb-player .lb-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+.leaderboard-item.match-pair .lb-player .lb-class {
+  font-size: 11px;
+  color: var(--dim);
+}
+.leaderboard-item.match-pair .lb-player .lb-score {
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--accent);
+}
+.leaderboard-item.match-pair .lb-score-main {
+  grid-column: 3;
+  font-weight: 900;
+  font-size: 24px;
+  color: var(--accent);
+  text-align: right;
+}
+.leaderboard-item.single {
+  grid-template-columns: 50px 1fr 100px;
+}
+.leaderboard-item.single .lb-single {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.leaderboard-item.single .lb-single .lb-name {
+  font-weight: 700;
+  font-size: 16px;
+}
+.leaderboard-item.single .lb-single .lb-class {
+  font-size: 12px;
+  color: var(--dim);
+}
+.leaderboard-item.single .lb-score {
+  grid-column: 3;
+  font-weight: 900;
+  font-size: 20px;
+  color: var(--accent);
+  text-align: right;
+}
 
 /* ---------- 高亮標記 ---------- */
 mark { background: #ffb020; color: #1a1a1a; padding: 2px 6px; border-radius: 4px; font-weight: 900; }

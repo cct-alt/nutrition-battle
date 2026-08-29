@@ -943,7 +943,127 @@ function renderLeaderboard(data, mode) {
     $('#leaderboardList').innerHTML = '<div class="leaderboard-empty">暫無紀錄</div>';
     return;
   }
-  $('#leaderboardList').innerHTML = data.map((entry, i) => {
+
+  if (mode === 'multi') {
+    // For multiplayer: group entries by timestamp proximity (within 5 seconds = same match)
+    // Then deduplicate by class+studentId keeping highest score per player
+    const sorted = [...data].sort((a, b) => a.timestamp - b.timestamp);
+    
+    // Group by timestamp proximity (within 10 seconds = same match)
+    const matches = [];
+    let currentMatch = [];
+    for (const entry of sorted) {
+      if (currentMatch.length === 0) {
+        currentMatch.push(entry);
+      } else {
+        const timeDiff = entry.timestamp - currentMatch[currentMatch.length - 1].timestamp;
+        if (timeDiff <= 10000) { // within 10 seconds = same match
+          currentMatch.push(entry);
+        } else {
+          if (currentMatch.length > 0) matches.push(currentMatch);
+          currentMatch = [entry];
+        }
+      }
+    }
+    if (currentMatch.length > 0) matches.push(currentMatch);
+
+    // Build leaderboard from matches
+    const matchResults = [];
+    const seenPlayers = new Map(); // class:studentId -> best score
+    
+    for (const match of matches) {
+      // Sort match by score descending
+      const sortedMatch = [...match].sort((a, b) => b.score - a.score);
+      
+      // Deduplicate within match by class:studentId, keep highest score
+      const matchDeduped = new Map();
+      for (const entry of sortedMatch) {
+        const key = entry.class + ':' + entry.studentId;
+        if (!matchDeduped.has(key) || entry.score > matchDeduped.get(key).score) {
+          matchDeduped.set(key, entry);
+        }
+      }
+      
+      const players = Array.from(matchDeduped.values());
+      if (players.length >= 1) {
+        // Sort by score descending
+        players.sort((a, b) => b.score - a.score);
+        
+        // Update global best score for each player
+        for (const p of players) {
+          const key = p.class + ':' + p.studentId;
+          if (!seenPlayers.has(key) || p.score > seenPlayers.get(key).score) {
+            seenPlayers.set(key, p);
+          }
+        }
+        
+        matchResults.push({
+          players: players.slice(0, 2), // max 2 players per match
+          maxScore: players[0].score,
+          timestamp: players[0].timestamp
+        });
+      }
+    }
+
+    // Sort matches by max score descending
+    matchResults.sort((a, b) => b.maxScore - a.maxScore);
+
+    // Render matches
+    $('#leaderboardList').innerHTML = matchResults.map((match, i) => {
+      const rank = i + 1;
+      const isRank1 = rank === 1;
+      const isRank2 = rank === 2;
+      const isRank3 = rank === 3;
+      
+      if (match.players.length === 2) {
+        const [p1, p2] = match.players;
+        return `
+          <div class="leaderboard-item match-pair ${rank <= 3 ? 'rank' + rank : ''}">
+            <div class="lb-rank ${rank <= 3 ? 'rank' + rank : ''}">${rank}</div>
+            <div class="lb-match">
+              <div class="lb-player winner">
+                <span class="lb-name">${escapeHtml(match.players[0].name)}</span>
+                <span class="lb-class">${match.players[0].class}班 ${match.players[0].studentId}號</span>
+                <span class="lb-score">${match.players[0].score}</span>
+              </div>
+              <span class="vs-badge">VS</span>
+              <div class="lb-player">
+                <span class="lb-name">${escapeHtml(match.players[1].name)}</span>
+                <span class="lb-class">${match.players[1].class}班 ${match.players[1].studentId}號</span>
+                <span class="lb-score">${match.players[1].score}</span>
+              </div>
+            </div>
+            <div class="lb-score-main">${match.maxScore}</div>
+          </div>
+        `;
+      } else {
+        const p = match.players[0];
+        return `
+          <div class="leaderboard-item single ${rank <= 3 ? 'rank' + rank : ''}">
+            <div class="lb-rank ${rank <= 3 ? 'rank' + rank : ''}">${rank}</div>
+            <div class="lb-single">
+              <span class="lb-name">${escapeHtml(p.name)}</span>
+              <span class="lb-class">${p.class}班 ${p.studentId}號</span>
+              <span class="lb-score">${p.score}</span>
+            </div>
+          </div>
+        `;
+      }
+    }).join('');
+    return;
+  }
+
+  // Single player mode - show individual entries with deduplication
+  const deduped = new Map();
+  for (const entry of data) {
+    const key = entry.class + ':' + entry.studentId;
+    if (!deduped.has(key) || entry.score > deduped.get(key).score) {
+      deduped.set(key, entry);
+    }
+  }
+  const dedupedList = Array.from(deduped.values()).sort((a, b) => b.score - a.score);
+  
+  $('#leaderboardList').innerHTML = dedupedList.map((entry, i) => {
     const rank = i + 1;
     const rankClass = rank <= 3 ? 'rank' + rank : '';
     return '<div class="leaderboard-item ' + (rank <= 3 ? 'rank' + rank : '') + '">' +
