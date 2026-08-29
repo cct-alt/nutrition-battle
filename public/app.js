@@ -685,7 +685,11 @@ async function startPractice() {
 
 function nextPQ() {
   P.qi += 1;
-  if (P.qi >= P.deck.length) { endPractice(); return; }
+  // 如果題目用完，重新打亂重新開始（不限題數，直到時間結束）
+  if (P.qi >= P.deck.length) {
+    P.deck = buildDeck(10);
+    P.qi = 0;
+  }
   P.answered = false;
   S.locked = false;
   S.myChoice = -1;
@@ -693,12 +697,12 @@ function nextPQ() {
   const q = P.deck[P.qi];
   onQuestion({
     qi: P.qi,
-    total: P.deck.length,
+    total: 999, // 不顯示總題數，改為倒數計時模式
     cat: q.c,
     text: q.q,
     options: q.options,
     endsIn: 15000,
-    double: P.qi === P.deck.length - 1
+    double: false
   });
   P.deadline = performance.now() + 15000;
 }
