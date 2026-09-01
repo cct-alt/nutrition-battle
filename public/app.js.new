@@ -1,22 +1,21 @@
-/* ============================================================
-   營養大作戰 — 前端邏輯
-   負責：WebSocket 連線／斷線重連、畫面渲染、計時動畫、音效、彩帶
-   ============================================================ */
+﻿/* ============================================================
+   ??憭找??????垢?摩
+   鞎痊嚗ebSocket ???嚗蝺????Ｘ葡?????怒?蔗撣?   ============================================================ */
 
 'use strict';
 
-/* ---------- 分類名稱（與題庫同步） ---------- */
+/* ---------- ???迂嚗?憿澈?郊嚗?---------- */
 const CAT_LABELS = {
-  CARB: '碳水化合物',
-  FAT: '脂質',
-  PROTEIN: '蛋白質',
-  VIT: '維生素',
-  MIN: '礦物質',
-  FIBER: '食用纖維',
-  WATER: '水'
+  CARB: '蝣單偌????,
+  FAT: '?釭',
+  PROTEIN: '?鞈?,
+  VIT: '蝬剔?蝝?,
+  MIN: '蝷衣鞈?,
+  FIBER: '憌蝥雁',
+  WATER: '瘞?
 };
 
-/* ---------- 全域狀態 ---------- */
+/* ---------- ?典????---------- */
 const S = {
   ws: null,
   code: '',
@@ -40,10 +39,9 @@ let rafId = null;
 let reconnTimer = null;
 let reconnTries = 0;
 
-/* ---------- 單人練習模式狀態 ---------- */
+/* ---------- ?桐犖蝺渡?璅∪????---------- */
 const P = {
-  active: false,   // 正在練習中
-  mode: '',        // 'solo' | 'multi' — 決定賽後按鈕行為
+  active: false,   // 甇?蝺渡?銝?  mode: '',        // 'solo' | 'multi' ??瘙箏?鞈賢???銵
   deck: [],
   qi: -1,
   score: 0,
@@ -55,7 +53,7 @@ const P = {
   deadline: 0
 };
 
-/* ---------- DOM 快取 ---------- */
+/* ---------- DOM 敹怠? ---------- */
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 const screens = $$('.screen');
@@ -73,7 +71,7 @@ function toast(text, ms = 2200) {
   setTimeout(() => el.remove(), ms);
 }
 
-/* ---------- 音效 ---------- */
+/* ---------- ?單? ---------- */
 const FX = {
   ctx: null,
   tone(f, d = 0.12, type = 'sine', g = 0.16, when = 0) {
@@ -87,7 +85,7 @@ const FX = {
       v.gain.exponentialRampToValueAtTime(0.001, t + d);
       o.connect(v); v.connect(this.ctx.destination);
       o.start(t); o.stop(t + d + 0.03);
-    } catch (e) { /* 忽略 */ }
+    } catch (e) { /* 敹賜 */ }
   },
   ok()   { this.tone(660, 0.09, 'triangle', 0.2); this.tone(880, 0.14, 'triangle', 0.2, 0.09); },
   bad()  { this.tone(150, 0.3, 'sawtooth', 0.18); },
@@ -105,14 +103,14 @@ document.addEventListener('pointerdown', () => {
   if (FX.ctx && FX.ctx.state === 'suspended') FX.ctx.resume();
 }, { once: false });
 
-$('#muteBtn').textContent = S.muted ? '🔇' : '🔊';
+$('#muteBtn').textContent = S.muted ? '??' : '??';
 $('#muteBtn').addEventListener('click', () => {
   S.muted = !S.muted;
   localStorage.setItem('nb_muted', S.muted ? '1' : '0');
-  $('#muteBtn').textContent = S.muted ? '🔇' : '🔊';
+  $('#muteBtn').textContent = S.muted ? '??' : '??';
 });
 
-/* ---------- 彩帶 ---------- */
+/* ---------- 敶拙葆 ---------- */
 const cvs = $('#fx');
 const ctx2d = cvs.getContext('2d');
 let parts = [];
@@ -155,7 +153,7 @@ function fxLoop() {
   else { fxRunning = false; ctx2d.clearRect(0, 0, cvs.width, cvs.height); }
 }
 
-/* ---------- 工具 ---------- */
+/* ---------- 撌亙 ---------- */
 const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 function genCode() {
   let s = '';
@@ -172,7 +170,7 @@ function send(obj) {
   if (S.ws && S.ws.readyState === 1) S.ws.send(JSON.stringify(obj));
 }
 
-/* ---------- 連線 ---------- */
+/* ---------- ??? ---------- */
 function connect(code, opts = {}) {
   clearTimeout(reconnTimer);
   S.code = code;
@@ -207,7 +205,7 @@ function scheduleReconnect() {
   reconnTries += 1;
   $('#reconnOverlay').classList.remove('hidden');
   if (reconnTries > 40) {
-    backHome('連線中斷，請重新加入');
+    backHome('???銝剜嚗???');
     return;
   }
   clearTimeout(reconnTimer);
@@ -228,21 +226,19 @@ function backHome(msg) {
   showScreen('home');
 }
 
-/* ---------- 心跳 + 斷線偵測（對付學校 Wi-Fi 不穩／iPad 睡屏斷線） ---------- */
+/* ---------- 敹歲 + ?瑞??菜葫嚗?隞飛??Wi-Fi 銝帘嚗Pad ?∪??瑞?嚗?---------- */
 setInterval(() => {
   if (S.ws && S.ws.readyState === 1) send({ type: 'ping' });
 }, 12000);
 
-// 半開連線偵測：15 秒無收到任何伺服器訊息（包括 pong）就強制重連
-setInterval(() => {
+// ??????菜葫嚗?5 蝘?嗅隞颱?隡箸??刻??荔?? pong嚗停撘瑕??setInterval(() => {
   if (S.phase === 'home' || !S.ws) return;
   if (Date.now() - S.lastRecv > 15000) {
     try { if (S.ws.readyState <= 1) S.ws.close(); } catch (e) {}
   }
 }, 4000);
 
-// iPad 睡屏後返回：即刻嘗試重連
-document.addEventListener('visibilitychange', () => {
+// iPad ?∪?敺????喳?岫??document.addEventListener('visibilitychange', () => {
   if (!document.hidden && S.phase !== 'home' &&
       (!S.ws || S.ws.readyState !== 1)) {
     reconnTries = 0;
@@ -251,7 +247,7 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-/* ---------- 訊息處理 ---------- */
+/* ---------- 閮?? ---------- */
 function handleMsg(m) {
   S.lastRecv = Date.now();
   switch (m.type) {
@@ -266,18 +262,18 @@ function handleMsg(m) {
     case 'scores': return onPlayers(m.players);
     case 'notice':
       $('#notice').textContent = m.text || '';
-      if ((m.text || '').indexOf('🎁') !== -1) FX.power();
+      if ((m.text || '').indexOf('??') !== -1) FX.power();
       return;
     case 'opponentDisconnected':
-      toast('⚠️ 對手斷線了…');
+      toast('?? 撠??瑞?鈭?);
       return;
     case 'paused':
-      $('#pauseHint').textContent = `等待重連中…（${m.waitSec} 秒後判負）`;
+      $('#pauseHint').textContent = `蝑???葉?佗?${m.waitSec} 蝘??方?嚗;
       $('#pauseOverlay').classList.remove('hidden');
       return;
     case 'reconnected':
       $('#pauseOverlay').classList.add('hidden');
-      if (m.slot !== S.slot) toast('✅ 對手已重新連線！');
+      if (m.slot !== S.slot) toast('??撠?撌脤??圈??嚗?);
       return;
     case 'gameOver': return onGameOver(m);
     case 'error':
@@ -306,7 +302,7 @@ function onInit(m) {
   } else if (m.phase === 'paused' || m.phase === 'reveal') {
     showScreen('game');
     if (m.phase === 'paused') {
-      $('#pauseHint').textContent = '等待對手重連…';
+      $('#pauseHint').textContent = '蝑?撠????;
       $('#pauseOverlay').classList.remove('hidden');
     }
   } else {
@@ -325,7 +321,7 @@ function onPlayers(players) {
 function onLobby(m) {
   S.hostSlot = m.hostSlot;
   onPlayers(m.players);
-  // 比賽進行中（或等對手重連時）千萬不要彈返去大廳畫面
+  // 瘥魚?脰?銝哨???撠????嚗??砌?閬?餈憭批輒?恍
   if (S.phase === 'game' || S.phase === 'paused' || S.phase === 'over') return;
   showScreen('lobby');
 }
@@ -336,12 +332,12 @@ function renderLobbySlots() {
     const p = S.players[i];
     if (p) {
       el.classList.toggle('filled', !!p.connected);
-      el.querySelector('.avatar').textContent = p.connected ? '🧑‍🎓' : '📴';
-      el.querySelector('.pname').textContent = p.name + (i === S.hostSlot ? '（房主）' : '') + (p.connected ? '' : '（斷線）');
+      el.querySelector('.avatar').textContent = p.connected ? '????? : '?';
+      el.querySelector('.pname').textContent = p.name + (i === S.hostSlot ? '嚗銝鳴?' : '') + (p.connected ? '' : '嚗蝺?');
     } else {
       el.classList.remove('filled');
-      el.querySelector('.avatar').textContent = '🧑‍🎓';
-      el.querySelector('.pname').textContent = '等待中…';
+      el.querySelector('.avatar').textContent = '?????;
+      el.querySelector('.pname').textContent = '蝑?銝凌?;
     }
   }
   const ready = S.players.every((p) => p && p.connected);
@@ -375,7 +371,7 @@ function onCountdown(n) {
   if (n > 0) FX.count(); else FX.go();
 }
 
-/* ---------- 題目 ---------- */
+/* ---------- 憿 ---------- */
 function onQuestion(p) {
   showScreen('game');
   $('#pauseOverlay').classList.add('hidden');
@@ -437,8 +433,7 @@ $$('.opt').forEach((b) => {
     e.preventDefault();
     if (S.locked || S.phase !== 'game') return;
 
-    // 單人練習模式：本地即時批改，不經伺服器
-    if (P.active) {
+    // ?桐犖蝺渡?璅∪?嚗?啣??對?銝?隡箸???    if (P.active) {
       if (P.answered) return;
       const i = b.dataset.i | 0;
       P.answered = true;
@@ -460,7 +455,7 @@ $$('.opt').forEach((b) => {
     $$('.opt').forEach((o) => {
       if (o !== b) o.classList.add('dimmed');
     });
-    $('#notice').textContent = '已搶答！等緊結果…';
+    $('#notice').textContent = '撌脫蝑?蝑?蝯???;
     send({ type: 'answer', choice: i });
   });
 });
@@ -480,10 +475,10 @@ function onWrong(m) {
     const btn = $(`.opt[data-i="${S.myChoice}"]`);
     if (btn) btn.classList.add('wrongpick');
     $$('.opt').forEach((o) => o.classList.add('lockedall'));
-    $('#notice').textContent = '❌ 答錯！扣血 -20，本題出局';
+    $('#notice').textContent = '??蝑嚗銵 -20嚗憿撅';
   } else {
     $('#buzzed').classList.remove('hidden');
-    $('#notice').textContent = '🎯 對手答錯被鎖定！快啲搶答！';
+    $('#notice').textContent = '? 撠?蝑鋡恍?摰?敹怠?嗥?嚗?;
   }
   renderPowers();
 }
@@ -506,16 +501,16 @@ function onRoundResult(m) {
   if (m.win != null) {
     if (m.win === S.slot) {
       FX.ok();
-      $('#notice').textContent = m.events.join('　');
+      $('#notice').textContent = m.events.join('?');
     } else {
       FX.bad();
-      $('#notice').textContent = m.events.join('　');
+      $('#notice').textContent = m.events.join('?');
     }
     const gain = m.gains[m.win];
     const card = m.win === S.slot ? '#hudMe' : '#hudOpp';
     floatGain(card, '+' + gain);
   } else {
-    $('#notice').textContent = m.events.join('　');
+    $('#notice').textContent = m.events.join('?');
     if (S.myChoice === -1) FX.bad();
   }
 
@@ -540,20 +535,20 @@ function renderHUD() {
     if (!card) continue;
     if (!p) { card.style.opacity = 0.35; continue; }
     card.style.opacity = p.connected === false ? 0.45 : 1;
-    card.querySelector('.pname').textContent = p.name + (p.slot === S.slot ? '（你）' : '');
+    card.querySelector('.pname').textContent = p.name + (p.slot === S.slot ? '嚗?嚗? : '');
     card.querySelector('.pscore').textContent = p.score;
     const hf = card.querySelector('.hpfill');
     hf.style.width = Math.max(0, p.hp) + '%';
     const cb = card.querySelector('.combo');
     if (p.combo >= 2) {
-      cb.textContent = '🔥x' + p.combo;
+      cb.textContent = '?x' + p.combo;
       cb.classList.add('on');
     } else {
       cb.textContent = '';
       cb.classList.remove('on');
     }
     card.querySelector('.ppowers').textContent =
-      (p.powers || []).map((w) => ({ fifty: '🗑️', freeze: '❄️', steal: '💰' }[w] || '')).join('');
+      (p.powers || []).map((w) => ({ fifty: '??儭?, freeze: '??', steal: '?' }[w] || '')).join('');
   }
 }
 
@@ -578,7 +573,7 @@ $$('.pw').forEach((b) => {
   });
 });
 
-/* ---------- 結果 ---------- */
+/* ---------- 蝯? ---------- */
 function onGameOver(m) {
   stopTimer();
   onPlayers(m.players);
@@ -592,24 +587,24 @@ function onGameOver(m) {
   const won = m.winner === S.slot;
   const draw = m.winner === -1;
   const banner = $('#overBanner');
-  banner.textContent = draw ? '🤝 平手！' : won ? '🏆 你贏咗！' : '😵 你輸咗…';
+  banner.textContent = draw ? '?? 撟單?嚗? : won ? '?? 雿???' : '? 雿撓??;
 
   if (m.reason === 'ko' && !draw) {
-    banner.textContent += won ? ' ⚡KO勝利' : ' ⚡被KO';
+    banner.textContent += won ? ' ?…O?' : ' ?∟◤KO';
   }
   if (m.reason === 'forfeit' && !draw) {
-    banner.textContent += won ? '（對手離場）' : '（斷線太久）';
+    banner.textContent += won ? '嚗???湛?' : '嚗蝺云銋?';
   }
 
-  $('.fscore.me .fname').textContent = (me() || {}).name || '你';
-  $('.fscore.opp .fname').textContent = (opp() || {}).name || '對手';
+  $('.fscore.me .fname').textContent = (me() || {}).name || '雿?;
+  $('.fscore.opp .fname').textContent = (opp() || {}).name || '撠?';
   $('.fscore.me .fpts').textContent = (me() || {}).score || 0;
   $('.fscore.opp .fpts').textContent = (opp() || {}).score || 0;
 
   const wk = m.weakCat && m.weakCat[S.slot];
   const tip = $('#weakTip');
   if (wk) {
-    tip.textContent = `📚 溫書提示：你今舖最弱嘅環節係「${CAT_LABELS[wk] || wk}」，快啲溫返呢部分，下舖報仇！`;
+    tip.textContent = `?? 皞急?內嚗?隞??撘勗??啁?靽?{CAT_LABELS[wk] || wk}??敹怠皞怨??ａ??銝??曹?嚗;
     tip.classList.remove('hidden');
   } else {
     tip.classList.add('hidden');
@@ -617,7 +612,7 @@ function onGameOver(m) {
 
   showScreen('over');
   renderPowers();
-  // 提交分數到排行榜（雙人模式）
+  // ?漱??唳?銵?嚗?鈭箸芋撘?
   if (S.class && S.studentId) {
     submitScore('multi', (me() || {}).score || 0, S.class, S.studentId);
   }
@@ -625,19 +620,17 @@ function onGameOver(m) {
 }
 
 function onError(m) {
-  if (!m.fatal) { toast(m.msg || '錯誤'); return; }
+  if (!m.fatal) { toast(m.msg || '?航炊'); return; }
 
-  // 房號撞名（建立時）：自動換過個新號再試
-  if (S.role === 'create' && m.msg && m.msg.indexOf('已有人使用') !== -1 && reconnTries < 3) {
+  // ?輯???嚗遣蝡?嚗??芸??????閰?  if (S.role === 'create' && m.msg && m.msg.indexOf('撌脫?鈭箔蝙??) !== -1 && reconnTries < 3) {
     reconnTries += 1;
     if (S.ws) { try { S.ws.onclose = null; S.ws.close(); } catch (e) {} }
     connect(genCode(), { freshJoin: true });
     return;
   }
 
-  // 重連失敗（房間已被清走）：自動用原本身份重新加入一次
-  const sess = JSON.parse(localStorage.getItem(sessKey(S.code)) || 'null');
-  if (sess && m.msg && m.msg.indexOf('過期') !== -1 && reconnTries < 4) {
+  // ??仃???輸?撌脰◤皜粥嚗??芸??典??祈澈隞賡??啣??乩?甈?  const sess = JSON.parse(localStorage.getItem(sessKey(S.code)) || 'null');
+  if (sess && m.msg && m.msg.indexOf('??') !== -1 && reconnTries < 4) {
     reconnTries += 1;
     if (S.ws) { try { S.ws.onclose = null; S.ws.close(); } catch (e) {} }
     S.sid = null;
@@ -645,10 +638,10 @@ function onError(m) {
     return;
   }
 
-  backHome(m.msg || '無法加入房間');
+  backHome(m.msg || '?⊥???輸?');
 }
 
-/* ---------- 單人練習模式 ---------- */
+/* ---------- ?桐犖蝺渡?璅∪? ---------- */
 async function startPractice() {
   P.active = true;
   P.mode = 'solo';
@@ -660,14 +653,14 @@ async function startPractice() {
   P.stats = {};
   P.answered = false;
   S.slot = 0;
-  S.players = [{ slot: 0, name: (S.name || '你') + '（練習）', score: 0, hp: 100, combo: 0, powers: [], connected: true }, null];
+  S.players = [{ slot: 0, name: (S.name || '雿?) + '嚗毀蝧?', score: 0, hp: 100, combo: 0, powers: [], connected: true }, null];
 
   $('#hudOpp').classList.add('hidden');
   document.querySelector('.powerdock').classList.add('hidden');
   $('#btnQuitPractice').classList.remove('hidden');
   showScreen('game');
   renderHUD();
-  $('#notice').textContent = '載入題目中…';
+  $('#notice').textContent = '頛憿銝凌?;
 
   try {
     const r = await fetch('/api/deck');
@@ -676,7 +669,7 @@ async function startPractice() {
     P.deck = data.deck;
   } catch (err) {
     P.active = false;
-    toast('載入題目失敗，請檢查網絡');
+    toast('頛憿憭望?嚗?瑼Ｘ蝬脩窗');
     showScreen('home');
     return;
   }
@@ -685,7 +678,7 @@ async function startPractice() {
 
 function nextPQ() {
   P.qi += 1;
-  // 如果題目用完，重新打亂重新開始（不限題數，直到時間結束）
+  // 憒?憿?典?嚗??唳?鈭??圈?憪?銝?憿嚗?唳?????
   if (P.qi >= P.deck.length) {
     P.deck = buildDeck(10);
     P.qi = 0;
@@ -697,7 +690,7 @@ function nextPQ() {
   const q = P.deck[P.qi];
   onQuestion({
     qi: P.qi,
-    total: 999, // 不顯示總題數，改為倒數計時模式
+    total: 999, // 銝＊蝷箇蜇憿嚗?箏閮?璅∪?
     cat: q.c,
     text: q.q,
     options: q.options,
@@ -727,10 +720,10 @@ function revealPQ(choice) {
     if (P.qi === P.deck.length - 1) gain *= 2;
     P.score += gain;
     FX.ok();
-    $('#notice').textContent = `⚡ 答對 +${gain} 分${mult > 1 ? `（連擊 ×${mult}）` : ''}${P.qi === P.deck.length - 1 ? ' 🔥終極題加倍🔥' : ''}`;
+    $('#notice').textContent = `??蝑? +${gain} ??{mult > 1 ? `嚗?? ?${mult}嚗 : ''}${P.qi === P.deck.length - 1 ? ' ?蝯扔憿???? : ''}`;
   } else if (choice === -1) {
     FX.bad();
-    $('#notice').textContent = '⏰ 時間到！';
+    $('#notice').textContent = '?????堆?';
   } else {
     P.combo = 0;
     P.hp -= 20;
@@ -739,9 +732,9 @@ function revealPQ(choice) {
     if (btn) btn.classList.add('wrongpick');
     if (P.hp <= 0) {
       P.hp = 0;
-      $('#notice').textContent = '💀 血量歸零，練習結束！';
+      $('#notice').textContent = '?? 銵?飛?塚?蝺渡?蝯?嚗?;
     } else {
-      $('#notice').textContent = '❌ 答錯！扣血 -20';
+      $('#notice').textContent = '??蝑嚗銵 -20';
     }
   }
 
@@ -768,16 +761,16 @@ function endPractice() {
   const isBest = P.score > best;
   if (isBest) localStorage.setItem('nb_best', String(P.score));
 
-  // 提交分數到排行榜
+  // ?漱??唳?銵?
   submitScore('solo', P.score, S.class, S.studentId);
 
-  $('#overBanner').textContent = isBest ? '🏅 新個人紀錄！' : '📋 練習完成';
-  $('#bestLine').textContent = `今次得分：${P.score}　·　本機最高分：${Math.max(best, P.score)}`;
+  $('#overBanner').textContent = isBest ? '?? ?啣犖蝝??' : '?? 蝺渡?摰?';
+  $('#bestLine').textContent = `隞活敺?嚗?{P.score}?繚??祆??擃?嚗?{Math.max(best, P.score)}`;
   $('#bestLine').classList.remove('hidden');
 
   document.querySelector('.fscore.opp').classList.add('hidden');
   document.querySelector('.finals .vs').classList.add('hidden');
-  $('.fscore.me .fname').textContent = S.name || '你';
+  $('.fscore.me .fname').textContent = S.name || '雿?;
   $('.fscore.me .fpts').textContent = P.score;
 
   let worst = null;
@@ -788,7 +781,7 @@ function endPractice() {
   }
   const tip = $('#weakTip');
   if (worst) {
-    tip.textContent = `📚 你最弱嘅環節係「${CAT_LABELS[worst.cat] || worst.cat}」，撳下面「溫習範圍」睇返呢部分！`;
+    tip.textContent = `?? 雿?撘勗??啁?靽?{CAT_LABELS[worst.cat] || worst.cat}???喃??Ｕ澈蝧???餈?典?嚗;
     tip.classList.remove('hidden');
   } else {
     tip.classList.add('hidden');
@@ -796,9 +789,9 @@ function endPractice() {
 
   const rb = $('#reviewBox');
   if (P.wrong.length) {
-    rb.innerHTML = '<h3>❌ 錯題重溫（' + P.wrong.length + ' 題）</h3>' +
+    rb.innerHTML = '<h3>???舫??澈嚗? + P.wrong.length + ' 憿?</h3>' +
       P.wrong.map((q) =>
-        `<div class="ritem"><div class="rq">${q.q}</div><div class="ra">✔ 正確答案：${q.options[q.a]}</div></div>`
+        `<div class="ritem"><div class="rq">${q.q}</div><div class="ra">??甇?Ⅱ蝑?嚗?{q.options[q.a]}</div></div>`
       ).join('');
     rb.classList.remove('hidden');
   } else {
@@ -809,25 +802,24 @@ function endPractice() {
   if (isBest) { confetti(); FX.win(); } else { FX.ok(); }
 }
 
-/* ---------- 主頁互動 ---------- */
-// 不自動填入名字，讓每位同學自行輸入
-
+/* ---------- 銝駁?鈭? ---------- */
+// 銝?‵?亙?摮?霈?雿?摮貉銵撓??
 function readName() {
   const n = $('#nameInput').value.trim().slice(0, 12);
   if (!n) {
-    toast('請先輸入名字！');
+    toast('隢?頛詨??嚗?);
     $('#nameInput').focus();
     return null;
   }
   const cls = $('#classSelect').value;
   if (!cls) {
-    toast('請選擇班別！');
+    toast('隢??伐?');
     $('#classSelect').focus();
     return null;
   }
   const sid = parseInt($('#studentIdInput').value, 10);
   if (isNaN(sid) || sid < 1 || sid > 40) {
-    toast('請輸入有效學號 (1-40)！');
+    toast('隢撓?交??飛??(1-40)嚗?);
     $('#studentIdInput').focus();
     return null;
   }
@@ -877,7 +869,7 @@ $('#btnJoin').addEventListener('click', () => {
   if (!readName()) return;
   const code = $('#codeInput').value.trim().toUpperCase();
   if (!/^[A-Z0-9]{4}$/.test(code)) {
-    toast('房號必須係 4 位英文／數字');
+    toast('?輯?敹?靽?4 雿???詨?');
     return;
   }
   S.role = 'join';
@@ -890,15 +882,15 @@ $('#codeInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') $('#btnJoin').click();
 });
 
-/* ---------- 大廳 ---------- */
+/* ---------- 憭批輒 ---------- */
 $('#btnStart').addEventListener('click', () => send({ type: 'start' }));
 $('#btnLeaveLobby').addEventListener('click', () => backHome());
 
-/* ---------- 結果 ---------- */
+/* ---------- 蝯? ---------- */
 $('#btnRematch').addEventListener('click', () => {
   if (P.mode === 'solo') { startPractice(); return; }
   send({ type: 'start' });
-  toast('等緊開波…');
+  toast('蝑??郭??);
 });
 $('#btnHomeOver').addEventListener('click', () => {
   if (P.mode === 'solo') {
@@ -912,10 +904,10 @@ $('#btnHomeOver').addEventListener('click', () => {
   backHome();
 });
 
-/* 防止 iOS 雙擊縮放／長按選字 */
+/* ?脫迫 iOS ??蝮格嚗?摮?*/
 document.addEventListener('dblclick', (e) => e.preventDefault(), { passive: false });
 
-/* ---------- 排行榜 API ---------- */
+/* ---------- ??璁?API ---------- */
 async function submitScore(mode, score, className, studentId) {
   try {
     const r = await fetch('/api/leaderboard', {
@@ -944,7 +936,7 @@ async function fetchLeaderboard(mode) {
 function renderLeaderboard(data, mode) {
   const list = $('#leaderboardList');
   if (!data.length) {
-    $('#leaderboardList').innerHTML = '<div class="leaderboard-empty">暫無紀錄</div>';
+    $('#leaderboardList').innerHTML = '<div class="leaderboard-empty">?怎蝝??/div>';
     return;
   }
 
@@ -1027,13 +1019,13 @@ function renderLeaderboard(data, mode) {
             <div class="lb-match">
               <div class="lb-player winner">
                 <span class="lb-name">${escapeHtml(match.players[0].name)}</span>
-                <span class="lb-class">${match.players[0].class}班 ${match.players[0].studentId}號</span>
+                <span class="lb-class">${match.players[0].class}??${match.players[0].studentId}??/span>
                 <span class="lb-score">${match.players[0].score}</span>
               </div>
               <span class="vs-badge">VS</span>
               <div class="lb-player">
                 <span class="lb-name">${escapeHtml(match.players[1].name)}</span>
-                <span class="lb-class">${match.players[1].class}班 ${match.players[1].studentId}號</span>
+                <span class="lb-class">${match.players[1].class}??${match.players[1].studentId}??/span>
                 <span class="lb-score">${match.players[1].score}</span>
               </div>
             </div>
@@ -1047,7 +1039,7 @@ function renderLeaderboard(data, mode) {
             <div class="lb-rank ${rank <= 3 ? 'rank' + rank : ''}">${rank}</div>
             <div class="lb-single">
               <span class="lb-name">${escapeHtml(p.name)}</span>
-              <span class="lb-class">${p.class}班 ${p.studentId}號</span>
+              <span class="lb-class">${p.class}??${p.studentId}??/span>
               <span class="lb-score">${p.score}</span>
             </div>
           </div>
@@ -1073,7 +1065,7 @@ function renderLeaderboard(data, mode) {
     return '<div class="leaderboard-item ' + (rank <= 3 ? 'rank' + rank : '') + '">' +
       '<div class="lb-rank ' + (rank <= 3 ? 'rank' + rank : '') + '">' + (i + 1) + '</div>' +
       '<div class="lb-name">' + escapeHtml(entry.name) + '</div>' +
-      '<div class="lb-class">' + entry.class + '班 ' + entry.studentId + '號</div>' +
+      '<div class="lb-class">' + entry.class + '??' + entry.studentId + '??/div>' +
       '<div class="lb-score">' + entry.score + '</div>' +
       '</div>';
   }).join('');
@@ -1096,8 +1088,8 @@ function showLeaderboard() {
   loadLeaderboard('multi');
 }
 
-/* ---------- 老師後台 ---------- */
-const TEACHER_PASSWORD = 'teacher123'; // 預設密碼，可自行修改
+/* ---------- ?葦敺 ---------- */
+const TEACHER_PASSWORD = 'teacher123'; // ?身撖Ⅳ嚗?芾?靽格
 
 let teacherData = {
   students: [],
@@ -1139,7 +1131,7 @@ async function loadTeacherData() {
       fetchLeaderboard('solo')
     ]);
 
-    // 合併並去重：同班同學號取最高分
+    // ?蔥銝血????飛???擃?
     const studentMap = new Map();
     
     [...multiData, ...soloData].forEach(entry => {
@@ -1157,10 +1149,8 @@ async function loadTeacherData() {
       }
       const student = studentMap.get(key);
       
-      // 累加分數和次數
-      if (entry.mode === 'multi' || entry.mode === undefined) {
-        // 這裡需要判斷模式，暫時用簡單邏輯
-        student.multiScore = Math.max(student.multiScore || 0, entry.score);
+      // 蝝臬???活??      if (entry.mode === 'multi' || entry.mode === undefined) {
+        // ?ㄐ?閬?瑟芋撘??急??函陛?桅?頛?        student.multiScore = Math.max(student.multiScore || 0, entry.score);
         student.totalGames = (student.totalGames || 0) + 1;
       } else if (entry.mode === 'solo') {
         student.soloScore = Math.max(student.soloScore || 0, entry.score);
@@ -1172,8 +1162,8 @@ async function loadTeacherData() {
     teacherData.students = Array.from(studentMap.values());
     renderTeacherTable();
   } catch (e) {
-    console.error('載入老師數據失敗:', e);
-    toast('載入數據失敗');
+    console.error('頛?葦?豢?憭望?:', e);
+    toast('頛?豢?憭望?');
   }
 }
 
@@ -1190,14 +1180,14 @@ function renderTeacherTable() {
     return true;
   });
   
-  // 排序：按最高分（取雙人和個人較高者）降序
+  // ??嚗??擃?嚗??犖?犖頛?????
   filtered.sort((a, b) => {
     const scoreA = Math.max(a.multiScore || 0, a.soloScore || 0);
     const scoreB = Math.max(b.multiScore || 0, b.soloScore || 0);
     return scoreB - scoreA;
   });
   
-  // 統計數據
+  // 蝯梯??豢?
   const totalStudents = teacherData.students.length;
   const multiPlayers = teacherData.students.filter(s => (s.multiScore || 0) > 0).length;
   const soloPlayers = teacherData.students.filter(s => (s.soloScore || 0) > 0).length;
@@ -1208,8 +1198,7 @@ function renderTeacherTable() {
   $('#statSoloPlayers').textContent = soloPlayers;
   $('#statTopScore').textContent = topScore;
 
-  // 過濾與排序
-  let filtered = teacherData.students.filter(s => {
+  // ?蕪??摨?  let filtered = teacherData.students.filter(s => {
     if (teacherData.filterClass && s.class !== teacherData.filterClass) return false;
     if (teacherData.searchText) {
       const search = teacherData.searchText.toLowerCase();
@@ -1225,7 +1214,7 @@ function renderTeacherTable() {
     return scoreB - scoreA;
   });
   
-  // 統計數據
+  // 蝯梯??豢?
   const totalStudents = teacherData.students.length;
   const multiPlayers = teacherData.students.filter(s => (s.multiScore || 0) > 0).length;
   const soloPlayers = teacherData.students.filter(s => (s.soloScore || 0) > 0).length;
@@ -1236,7 +1225,7 @@ function renderTeacherTable() {
   $('#statSoloPlayers').textContent = soloPlayers;
   $('#statTopScore').textContent = topScore;
 
-  // 分頁
+  // ??
   let filtered = teacherData.students.filter(s => {
     if (teacherData.filterClass && s.class !== teacherData.filterClass) return false;
     if (teacherData.searchText) {
@@ -1258,12 +1247,12 @@ function renderTeacherTable() {
   const start = (teacherData.currentPage - 1) * teacherData.pageSize;
   const pageData = filtered.slice(start, start + teacherData.pageSize);
 
-  // 渲染表格
+  // 皜脫?銵冽
   const tbody = $('#studentTableBody');
   tbody.innerHTML = pageData.map((student, i) => {
     const rank = i + 1 + (teacherData.currentPage - 1) * teacherData.pageSize;
     const bestScore = Math.max(student.multiScore || 0, student.soloScore || 0);
-    const lastPlayed = student.lastPlayed ? new Date(student.lastPlayed).toLocaleString('zh-HK') : '從未';
+    const lastPlayed = student.lastPlayed ? new Date(student.lastPlayed).toLocaleString('zh-HK') : '敺';
     
     return `
       <tr>
@@ -1276,12 +1265,12 @@ function renderTeacherTable() {
         <td>${student.soloScore || 0}</td>
         <td>${student.totalGames || 0}</td>
         <td>${lastPlayed}</td>
-        <td><button class="action-btn delete-btn" onclick="deleteStudent('${student.class}','${student.studentId}')">刪除</button></td>
+        <td><button class="action-btn delete-btn" onclick="deleteStudent('${student.class}','${student.studentId}')">?芷</button></td>
       </tr>
     `;
   }).join('');
 
-  // 分頁控制
+  // ???批
   const filtered = teacherData.students.filter(s => {
     if (teacherData.filterClass && s.class !== teacherData.filterClass) return false;
     if (teacherData.searchText) {
@@ -1292,50 +1281,50 @@ function renderTeacherTable() {
   });
   
   const totalPages = Math.ceil(filtered.length / teacherData.pageSize) || 1;
-  $('#pageInfo').textContent = `第 ${teacherData.currentPage} 頁 / 共 ${totalPages} 頁`;
+  $('#pageInfo').textContent = `蝚?${teacherData.currentPage} ??/ ??${totalPages} ?;
   $('#prevPage').disabled = teacherData.currentPage <= 1;
   $('#nextPage').disabled = teacherData.currentPage >= Math.ceil(filtered.length / teacherData.pageSize) || filtered.length === 0;
 }
 
 function deleteStudent(className, studentId) {
-  if (!confirm(`確定要刪除 ${className} 班 ${studentId} 號的所有記錄？此操作不可復原！`)) return;
+  if (!confirm(`蝣箏?閬??${className} ??${studentId} ???????甇斗?雿??臬儔??`)) return;
   
-  // 這裡需要呼叫後端 API 刪除
-  // 暫時先從前端移除
+  // ?ㄐ?閬?怠?蝡?API ?芷
+  // ?急????垢蝘駁
   teacherData.students = teacherData.students.filter(s => 
     !(s.class === className && s.studentId === studentId)
   );
   renderTeacherTable();
-  toast('已移除（需後端同步才能永久刪除）');
+  toast('撌脩宏?歹??敺垢?郊?瘞訾??芷嚗?);
 }
 
 function confirmClear(mode) {
-  const modeText = mode === 'solo' ? '個人挑戰' : '雙人對戰';
-  if (!confirm(`確定要清空所有「${modeText}」排行榜資料？此操作不可復原！`)) return;
+  const modeText = mode === 'solo' ? '?犖?' : '?犖撠';
+  if (!confirm(`蝣箏?閬?蝛箸???{modeText}??銵?鞈?嚗迨??銝敺拙?嚗)) return;
   
-  // 呼叫後端 API 清空
+  // ?澆敺垢 API 皜征
   fetch('/api/leaderboard', {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ mode })
   }).then(r => {
     if (r.ok) {
-      toast(`${modeText}排行榜已清空`);
+      toast(`${modeText}??璁歇皜征`);
       if (teacherData.currentMode === mode) loadTeacherData();
     } else {
-      toast('清空失敗');
+      toast('皜征憭望?');
     }
   });
 }
 
 function exportCSV() {
   const { students } = teacherData;
-  if (!students.length) { toast('無資料可匯出'); return; }
+  if (!students.length) { toast('?∟???臬'); return; }
   
-  const headers = ['排名','班別','學號','姓名','最高分','雙人對戰分','個人挑戰分','遊戲次數','最後遊戲時間'];
+  const headers = ['??','?剖','摮貉?','憪?','?擃?','?犖撠??,'?犖???,'?甈⊥','?敺??脫???];
   const rows = teacherData.students.map((s, i) => {
     const bestScore = Math.max(s.multiScore || 0, s.soloScore || 0);
-    const lastPlayed = s.lastPlayed ? new Date(s.lastPlayed).toLocaleString('zh-HK') : '從未';
+    const lastPlayed = s.lastPlayed ? new Date(s.lastPlayed).toLocaleString('zh-HK') : '敺';
     return [i+1, s.class, s.studentId, s.name, 
       Math.max(s.multiScore||0, s.soloScore||0), s.multiScore||0, s.soloScore||0, 
       s.totalGames||0, lastPlayed].join(',');
@@ -1345,50 +1334,50 @@ function exportCSV() {
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = `排行榜_${new Date().toLocaleDateString('zh-HK')}.csv`;
+  a.href = url; a.download = `??璁${new Date().toLocaleDateString('zh-HK')}.csv`;
   a.click(); URL.revokeObjectURL(url);
-  toast('CSV 已下載');
+  toast('CSV 撌脖?頛?);
 }
 
 function deleteStudent(className, studentId) {
-  if (!confirm(`確定要刪除 ${className} 班 ${studentId} 號的所有記錄？此操作不可復原！`)) return;
+  if (!confirm(`蝣箏?閬??${className} ??${studentId} ???????甇斗?雿??臬儔??`)) return;
   
-  // 這裡需要呼叫後端 API 刪除
-  // 暫時先從前端移除
+  // ?ㄐ?閬?怠?蝡?API ?芷
+  // ?急????垢蝘駁
   teacherData.students = teacherData.students.filter(s => 
     !(s.class === className && s.studentId === studentId)
   );
   renderTeacherTable();
-  toast('已移除（需後端同步才能永久刪除）');
+  toast('撌脩宏?歹??敺垢?郊?瘞訾??芷嚗?);
 }
 
 function confirmClear(mode) {
-  const modeText = mode === 'solo' ? '個人挑戰' : '雙人對戰';
-  if (!confirm(`確定要清空所有「${modeText}」排行榜資料？此操作不可復原！`)) return;
+  const modeText = mode === 'solo' ? '?犖?' : '?犖撠';
+  if (!confirm(`蝣箏?閬?蝛箸???{modeText}??銵?鞈?嚗迨??銝敺拙?嚗)) return;
   
-  // 呼叫後端 API 清空
+  // ?澆敺垢 API 皜征
   fetch('/api/leaderboard', {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ mode })
   }).then(r => {
     if (r.ok) {
-      toast(`${modeText}排行榜已清空`);
+      toast(`${modeText}??璁歇皜征`);
       if (teacherData.currentMode === mode) loadTeacherData();
     } else {
-      toast('清空失敗');
+      toast('皜征憭望?');
     }
   });
 }
 
 function exportCSV() {
   const { students } = teacherData;
-  if (!students.length) { toast('無資料可匯出'); return; }
+  if (!students.length) { toast('?∟???臬'); return; }
   
-  const headers = ['排名','班別','學號','姓名','最高分','雙人對戰分','個人挑戰分','遊戲次數','最後遊戲時間'];
+  const headers = ['??','?剖','摮貉?','憪?','?擃?','?犖撠??,'?犖???,'?甈⊥','?敺??脫???];
   const rows = teacherData.students.map((s, i) => {
     const bestScore = Math.max(s.multiScore || 0, s.soloScore || 0);
-    const lastPlayed = s.lastPlayed ? new Date(s.lastPlayed).toLocaleString('zh-HK') : '從未';
+    const lastPlayed = s.lastPlayed ? new Date(s.lastPlayed).toLocaleString('zh-HK') : '敺';
     return [i+1, s.class, s.studentId, s.name, 
       Math.max(s.multiScore||0, s.soloScore||0), s.multiScore||0, s.soloScore||0, 
       s.totalGames||0, lastPlayed].join(',');
@@ -1398,70 +1387,8 @@ function exportCSV() {
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = `排行榜_${new Date().toLocaleDateString('zh-HK')}.csv`;
+  a.href = url; a.download = `??璁${new Date().toLocaleDateString('zh-HK')}.csv`;
   a.click(); URL.revokeObjectURL(url);
-  toast('CSV 已下載');
+  toast('CSV 撌脖?頛?);
 }
-
-/* ---------- 老師後台事件監聽 ---------- */
-#btnLeaderboard.addEventListener('click', showTeacherLogin);
-#btnLeaderboardOver.addEventListener('click', showTeacherLogin);
-#btnLeaderboardBack.addEventListener('click', () => showScreen('home'));
-#btnTeacherLogin.addEventListener('click', verifyTeacherPassword);
-#teacherPassword.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') verifyTeacherPassword();
-});
-#btnLogout.addEventListener('click', logoutTeacher);
-#btnExportCSV.addEventListener('click', exportCSV);
-#btnClearSolo.addEventListener('click', () => confirmClear('solo'));
-#btnClearMulti.addEventListener('click', () => confirmClear('multi'));
-#btnLogout.addEventListener('click', logoutTeacher);
-#btnLeaderboard.addEventListener('click', showTeacherLogin);
-#btnLeaderboardOver.addEventListener('click', showTeacherLogin);
-#btnLeaderboardBack.addEventListener('click', () => showScreen('home'));
-
-#tabMulti.addEventListener('click', () => loadLeaderboard('multi'));
-#tabSolo.addEventListener('click', () => loadLeaderboard('solo'));
-
-// 分頁按鈕
-#prevPage.addEventListener('click', () => {
-  if (teacherData.currentPage > 1) {
-    teacherData.currentPage--;
-    renderTeacherTable();
-  }
-});
-
-#nextPage.addEventListener('click', () => {
-  const filtered = teacherData.students.filter(s => {
-    if (teacherData.filterClass && s.class !== teacherData.filterClass) return false;
-    if (teacherData.searchText) {
-      const search = teacherData.searchText.toLowerCase();
-      if (!s.name.toLowerCase().includes(search) && !String(s.studentId).includes(search)) return false;
-    }
-    return true;
-  });
-  const totalPages = Math.ceil(filtered.length / teacherData.pageSize) || 1;
-  if (teacherData.currentPage < totalPages) {
-    teacherData.currentPage++;
-    renderTeacherTable();
-  }
-});
-
-// 篩選
-#filterClass.addEventListener('change', (e) => {
-  teacherData.filterClass = e.target.value;
-  teacherData.currentPage = 1;
-  renderTeacherTable();
-});
-
-#searchInput.addEventListener('input', (e) => {
-  teacherData.searchText = e.target.value.trim();
-  teacherData.currentPage = 1;
-  renderTeacherTable();
-}
-
-// 密碼輸入 Enter 鍵登入
-#teacherPassword.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') verifyTeacherPassword();
-});
 

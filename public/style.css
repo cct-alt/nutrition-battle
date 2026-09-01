@@ -387,6 +387,55 @@ mark { background: #ffb020; color: #1a1a1a; padding: 2px 6px; border-radius: 4px
 }
 @keyframes floatup { from { opacity: 1; transform: translate(-50%, 0);} to { opacity: 0; transform: translate(-50%, -34px);} }
 
+/* ---------- 老師後台 ---------- */
+.teacher-header { text-align: center; margin-bottom: 20px; }
+.teacher-auth { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+.teacher-auth input { width: 220px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: rgba(0,0,0,.25); color: var(--text); font-size: 18px; text-align: center; }
+.auth-error { color: #ff4d5a; font-size: 14px; font-weight: 600; min-height: 20px; text-align: center; }
+.teacher-panel { width: min(1000px, 96vw); max-height: 90vh; overflow-y: auto; }
+.teacher-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; padding: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
+.toolbar-left { display: flex; gap: 10px; flex-wrap: wrap; }
+.toolbar-left select, .toolbar-left input { height: 40px; border-radius: 10px; border: 1px solid var(--line); background: rgba(0,0,0,.25); color: var(--text); font-size: 15px; padding: 0 12px; }
+.toolbar-right { display: flex; gap: 8px; }
+.toolbar-right .btn { min-height: 40px; }
+.stats-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.stat-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; text-align: center; }
+.stat-label { display: block; font-size: 13px; color: var(--dim); margin-bottom: 4px; }
+.stat-value { font-size: 24px; font-weight: 900; color: var(--accent); }
+.teacher-table-container { overflow-x: auto; }
+.teacher-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.teacher-table th, .teacher-table td { padding: 10px 8px; text-align: center; border-bottom: 1px solid var(--line); }
+.teacher-table th { background: rgba(255,176,32,.15); color: var(--accent); font-weight: 800; font-size: 13px; }
+.teacher-table td { font-size: 13px; }
+.teacher-table tr:hover td { background: rgba(255,176,32,.08); }
+.teacher-table .action-btn { padding: 4px 8px; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; margin: 0 2px; }
+.delete-btn { background: #ff4d5a; color: #fff; }
+.pagination { display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+
+/* Teacher Auth */
+.teacher-auth { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+.teacher-auth input { width: 220px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: rgba(0,0,0,.25); color: var(--text); font-size: 18px; text-align: center; }
+.auth-error { color: #ff4d5a; font-size: 14px; font-weight: 600; min-height: 20px; text-align: center; }
+.teacher-panel { width: min(1000px, 96vw); max-height: 90vh; overflow-y: auto; }
+.teacher-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; padding: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
+.toolbar-left { display: flex; gap: 10px; flex-wrap: wrap; }
+.toolbar-left select, .toolbar-left input { height: 40px; border-radius: 10px; border: 1px solid var(--line); background: rgba(0,0,0,.25); color: var(--text); font-size: 15px; padding: 0 12px; }
+.toolbar-right { display: flex; gap: 8px; }
+.toolbar-right .btn { min-height: 40px; }
+.stats-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.stat-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; text-align: center; }
+.stat-label { display: block; font-size: 13px; color: var(--dim); margin-bottom: 4px; }
+.stat-value { font-size: 24px; font-weight: 900; color: var(--accent); }
+.teacher-table-container { overflow-x: auto; }
+.teacher-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.teacher-table th, .teacher-table td { padding: 10px 8px; text-align: center; border-bottom: 1px solid var(--line); }
+.teacher-table th { background: rgba(255,176,32,.15); color: var(--accent); font-weight: 800; font-size: 13px; }
+.teacher-table td { font-size: 13px; }
+.teacher-table tr:hover td { background: rgba(255,176,32,.08); }
+.teacher-table .action-btn { padding: 4px 8px; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; margin: 0 2px; }
+.delete-btn { background: #ff4d5a; color: #fff; }
+.pagination { display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+
 /* ---------- 橫向窄屏微調 ---------- */
 @media (max-height: 520px) {
   .logo { font-size: 44px; }
