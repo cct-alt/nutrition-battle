@@ -1208,7 +1208,7 @@ function renderTeacherTable() {
   $('#statSoloPlayers').textContent = soloPlayers;
   $('#statTopScore').textContent = topScore;
 
-  // ÂàÜÈ†Å
+  // ÂàÜÈ†ÅÊéßÂà∂
   const totalPages = Math.ceil(filtered.length / teacherData.pageSize) || 1;
   if (teacherData.currentPage > totalPages) teacherData.currentPage = totalPages;
   const start = (teacherData.currentPage - 1) * teacherData.pageSize;
@@ -1238,10 +1238,9 @@ function renderTeacherTable() {
   }).join('');
 
   // ÂàÜÈ†ÅÊéßÂà∂
-  const totalPages = Math.ceil(filtered.length / teacherData.pageSize) || 1;
   $('#pageInfo').textContent = `Á¨¨ ${teacherData.currentPage} È†Å / ÂÖ± ${totalPages} È†Å`;
   $('#prevPage').disabled = teacherData.currentPage <= 1;
-  $('#nextPage').disabled = teacherData.currentPage >= Math.ceil(filtered.length / teacherData.pageSize) || filtered.length === 0;
+  $('#nextPage').disabled = teacherData.currentPage >= totalPages || filtered.length === 0;
 }
 
 function deleteStudent(className, studentId) {
@@ -1412,3 +1411,17 @@ function exportCSV() {
   if (e.key === 'Enter') verifyTeacherPassword();
 });
 
+/ *   - - - - - - - - - -   ? +ÅÎè  i O S   ? TÍ? ná<hÁ/ ? _t? ? hä?   - - - - - - - - - -   * /  
+ d o c u m e n t . a d d E v e n t L i s t e n e r ( ' d b l c l i c k ' ,   ( e )   = >   e . p r e v e n t D e f a u l t ( ) ,   {   p a s s i v e :   f a l s e   } ) ;  
+  
+ c o n s o l e . l o g ( ' ? Ä ? "Ù? ûñÂUKÎ? ‚åÍåd0ÅIë? ? ) ;  
+     }   c a t c h   ( e )   {  
+         c o n s o l e . e r r o r ( ' -í\ı£è? ? Ô? ;RIë? ¿Ù√N? ? ' ,   e ) ;  
+ }  
+  
+ i f   ( d o c u m e n t . r e a d y S t a t e   = = =   ' l o a d i n g ' )   {  
+     d o c u m e n t . a d d E v e n t L i s t e n e r ( ' D O M C o n t e n t L o a d e d ' ,   i n i t E v e n t L i s t e n e r s ) ;  
+ }   e l s e   {  
+     i n i t E v e n t L i s t e n e r s ( ) ;  
+ }  
+ 

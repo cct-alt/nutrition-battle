@@ -1,0 +1,13 @@
+/* ---------- 防止 iOS 雙擊縮放/長按選字 ---------- */
+document.addEventListener('dblclick', (e) => e.preventDefault(), { passive: false });
+
+console.log('所有事件監聽器已註冊');
+  } catch (e) {
+    console.error('事件監聽器註冊失敗:', e);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initEventListeners);
+} else {
+  initEventListeners();
+}
