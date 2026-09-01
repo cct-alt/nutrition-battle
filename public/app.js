@@ -1394,20 +1394,20 @@ $('#nextPage').addEventListener('click', () => {
 });
 
 // 篩選
-#filterClass.addEventListener('change', (e) => {
+$('#filterClass').addEventListener('change', (e) => {
   teacherData.filterClass = e.target.value;
   teacherData.currentPage = 1;
   renderTeacherTable();
 });
 
-#searchInput.addEventListener('input', (e) => {
+$('#searchInput').addEventListener('input', (e) => {
   teacherData.searchText = e.target.value.trim();
   teacherData.currentPage = 1;
   renderTeacherTable();
 }
 
 // 密碼輸入 Enter 鍵登入
-#teacherPassword.addEventListener('keydown', (e) => {
+$('#teacherPassword').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') verifyTeacherPassword();
 });
 
