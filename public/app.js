@@ -1370,14 +1370,14 @@ $('#tabMulti').addEventListener('click', () => loadLeaderboard('multi'));
 $('#tabSolo').addEventListener('click', () => loadLeaderboard('solo'));
 
 // 分頁按鈕
-#prevPage.addEventListener('click', () => {
+$('#prevPage').addEventListener('click', () => {
   if (teacherData.currentPage > 1) {
     teacherData.currentPage--;
     renderTeacherTable();
   }
 });
 
-#nextPage.addEventListener('click', () => {
+$('#nextPage').addEventListener('click', () => {
   const filtered = teacherData.students.filter(s => {
     if (teacherData.filterClass && s.class !== teacherData.filterClass) return false;
     if (teacherData.searchText) {
