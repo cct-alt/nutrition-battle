@@ -1208,51 +1208,7 @@ function renderTeacherTable() {
   $('#statSoloPlayers').textContent = soloPlayers;
   $('#statTopScore').textContent = topScore;
 
-  // 過濾與排序
-  let filtered = teacherData.students.filter(s => {
-    if (teacherData.filterClass && s.class !== teacherData.filterClass) return false;
-    if (teacherData.searchText) {
-      const search = teacherData.searchText.toLowerCase();
-      if (!s.name.toLowerCase().includes(search) && 
-          !String(s.studentId).includes(search)) return false;
-    }
-    return true;
-  });
-  
-  filtered.sort((a, b) => {
-    const scoreA = Math.max(a.multiScore || 0, a.soloScore || 0);
-    const scoreB = Math.max(b.multiScore || 0, b.soloScore || 0);
-    return scoreB - scoreA;
-  });
-  
-  // 統計數據
-  const totalStudents = teacherData.students.length;
-  const multiPlayers = teacherData.students.filter(s => (s.multiScore || 0) > 0).length;
-  const soloPlayers = teacherData.students.filter(s => (s.soloScore || 0) > 0).length;
-  const topScore = Math.max(...teacherData.students.map(s => Math.max(s.multiScore || 0, s.soloScore || 0)), 0);
-  
-  $('#statTotalStudents').textContent = teacherData.students.length;
-  $('#statMultiPlayers').textContent = multiPlayers;
-  $('#statSoloPlayers').textContent = soloPlayers;
-  $('#statTopScore').textContent = topScore;
-
   // 分頁
-  let filtered = teacherData.students.filter(s => {
-    if (teacherData.filterClass && s.class !== teacherData.filterClass) return false;
-    if (teacherData.searchText) {
-      const search = teacherData.searchText.toLowerCase();
-      if (!s.name.toLowerCase().includes(search) && 
-          !String(s.studentId).includes(search)) return false;
-    }
-    return true;
-  });
-  
-  filtered.sort((a, b) => {
-    const scoreA = Math.max(a.multiScore || 0, a.soloScore || 0);
-    const scoreB = Math.max(b.multiScore || 0, b.soloScore || 0);
-    return scoreB - scoreA;
-  });
-  
   const totalPages = Math.ceil(filtered.length / teacherData.pageSize) || 1;
   if (teacherData.currentPage > totalPages) teacherData.currentPage = totalPages;
   const start = (teacherData.currentPage - 1) * teacherData.pageSize;
@@ -1282,15 +1238,6 @@ function renderTeacherTable() {
   }).join('');
 
   // 分頁控制
-  const filtered = teacherData.students.filter(s => {
-    if (teacherData.filterClass && s.class !== teacherData.filterClass) return false;
-    if (teacherData.searchText) {
-      const search = teacherData.searchText.toLowerCase();
-      if (!s.name.toLowerCase().includes(search) && !String(s.studentId).includes(search)) return false;
-    }
-    return true;
-  });
-  
   const totalPages = Math.ceil(filtered.length / teacherData.pageSize) || 1;
   $('#pageInfo').textContent = `第 ${teacherData.currentPage} 頁 / 共 ${totalPages} 頁`;
   $('#prevPage').disabled = teacherData.currentPage <= 1;
