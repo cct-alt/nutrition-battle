@@ -1350,24 +1350,24 @@ function exportCSV() {
 }
 
 /* ---------- è€å¸«å¾Œå°äº‹ä»¶ç›£è½ ---------- */
-#btnLeaderboard.addEventListener('click', showTeacherLogin);
-#btnLeaderboardOver.addEventListener('click', showTeacherLogin);
-#btnLeaderboardBack.addEventListener('click', () => showScreen('home'));
-#btnTeacherLogin.addEventListener('click', verifyTeacherPassword);
-#teacherPassword.addEventListener('keydown', (e) => {
+$('#btnLeaderboard').addEventListener('click', showTeacherLogin);
+$('#btnLeaderboardOver').addEventListener('click', showTeacherLogin);
+$('#btnLeaderboardBack').addEventListener('click', () => showScreen('home'));
+$('#btnTeacherLogin').addEventListener('click', verifyTeacherPassword);
+$('#teacherPassword').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') verifyTeacherPassword();
 });
-#btnLogout.addEventListener('click', logoutTeacher);
-#btnExportCSV.addEventListener('click', exportCSV);
-#btnClearSolo.addEventListener('click', () => confirmClear('solo'));
-#btnClearMulti.addEventListener('click', () => confirmClear('multi'));
-#btnLogout.addEventListener('click', logoutTeacher);
-#btnLeaderboard.addEventListener('click', showTeacherLogin);
-#btnLeaderboardOver.addEventListener('click', showTeacherLogin);
-#btnLeaderboardBack.addEventListener('click', () => showScreen('home'));
+$('#btnLogout').addEventListener('click', logoutTeacher);
+$('#btnExportCSV').addEventListener('click', exportCSV);
+$('#btnClearSolo').addEventListener('click', () => confirmClear('solo'));
+$('#btnClearMulti').addEventListener('click', () => confirmClear('multi'));
+$('#btnLogout').addEventListener('click', logoutTeacher);
+$('#btnLeaderboard').addEventListener('click', showTeacherLogin);
+$('#btnLeaderboardOver').addEventListener('click', showTeacherLogin);
+$('#btnLeaderboardBack').addEventListener('click', () => showScreen('home'));
 
-#tabMulti.addEventListener('click', () => loadLeaderboard('multi'));
-#tabSolo.addEventListener('click', () => loadLeaderboard('solo'));
+$('#tabMulti').addEventListener('click', () => loadLeaderboard('multi'));
+$('#tabSolo').addEventListener('click', () => loadLeaderboard('solo'));
 
 // åˆ†é æŒ‰éˆ•
 #prevPage.addEventListener('click', () => {
@@ -1411,12 +1411,12 @@ function exportCSV() {
   if (e.key === 'Enter') verifyTeacherPassword();
 });
 
-/ *   - - - - - - - - - -   ? +ë  i O S   ? Tê? n‡<hç/ ? _t? ? hŠ?   - - - - - - - - - -   * /  
+/ *   - - - - - - - - - -   ? +ï¿½ï¿½  i O S   ? Tï¿½? nï¿½<hï¿½/ ? _t? ? hï¿½?   - - - - - - - - - -   * /  
  d o c u m e n t . a d d E v e n t L i s t e n e r ( ' d b l c l i c k ' ,   ( e )   = >   e . p r e v e n t D e f a u l t ( ) ,   {   p a s s i v e :   f a l s e   } ) ;  
   
- c o n s o l e . l o g ( ' ? € ? "ô? –åUKë? âŒêŒd0I‘? ? ) ;  
+ c o n s o l e . l o g ( ' ? ï¿½ ? "ï¿½? ï¿½ï¿½ï¿½UKï¿½? ï¿½ï¿½d0ï¿½Iï¿½? ? ) ;  
      }   c a t c h   ( e )   {  
-         c o n s o l e . e r r o r ( ' -’\õ£? ? ï? ;RI‘? ÀôÃN? ? ' ,   e ) ;  
+         c o n s o l e . e r r o r ( ' -ï¿½\ï¿½ï¿½ï¿½? ? ï¿½? ;RIï¿½? ï¿½ï¿½ï¿½N? ? ' ,   e ) ;  
  }  
   
  i f   ( d o c u m e n t . r e a d y S t a t e   = = =   ' l o a d i n g ' )   {  
