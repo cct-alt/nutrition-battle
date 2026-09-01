@@ -1404,7 +1404,7 @@ $('#searchInput').addEventListener('input', (e) => {
   teacherData.searchText = e.target.value.trim();
   teacherData.currentPage = 1;
   renderTeacherTable();
-}
+});
 
 // 密碼輸入 Enter 鍵登入
 $('#teacherPassword').addEventListener('keydown', (e) => {
